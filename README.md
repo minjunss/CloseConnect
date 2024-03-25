@@ -1,4 +1,4 @@
-#CloseConnect
+# CloseConnect
 
-##Introduce
+## Introduce
 "Try talking to nearby people."
