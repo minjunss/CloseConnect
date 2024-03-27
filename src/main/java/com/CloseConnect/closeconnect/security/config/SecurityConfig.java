@@ -60,6 +60,7 @@ public class SecurityConfig {
                 authorizeRequests
                         .requestMatchers("/oauth2/authorize/**").permitAll()
                         .requestMatchers("/test1").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                         .anyRequest().authenticated());
 
         //OAuth2Login 설정
