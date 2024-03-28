@@ -5,6 +5,9 @@ import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.security.oatuh2.UserPrincipal;
 import com.CloseConnect.closeconnect.service.post.PostService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +29,11 @@ public class PostController {
 
     @PostMapping
     @Operation(summary = "글 등록 API")
+    @ApiResponse(
+            responseCode = "200",
+            description = "글 등록 성공",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PostDto.Response.class))
+    )
     public ResponseEntity<?> createPost(@RequestBody PostDto.Request request,
                                         @AuthenticationPrincipal UserDetails UserDetails) {
         return ResponseEntity.ok(postService.save(request, UserDetails.getUsername()));
@@ -33,6 +41,11 @@ public class PostController {
 
     @GetMapping("/{id}")
     @Operation(summary = "글 조회 API", description = "id로 글 조회")
+    @ApiResponse(
+            responseCode = "200",
+            description = "글 조회 성공",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PostDto.Response.class))
+    )
     public ResponseEntity<?> readPost(@PathVariable Long id) {
         return ResponseEntity.ok(postService.findById(id));
     }
