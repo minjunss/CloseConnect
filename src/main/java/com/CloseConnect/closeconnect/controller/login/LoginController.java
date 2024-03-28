@@ -21,8 +21,7 @@ public class LoginController {
     @Tag(name = "Login API")
     @Operation(summary = "소셜 로그인 콜백 API", description = "예시: http://localhost:8080/oauth2/authorize/google?redirect_uri=http://localhost:8080/oauth2/callback/google")
     public void oauth2Login(@RequestParam OAuth2UserRequest oAuth2UserRequest,
-                            @PathVariable String provider) throws Exception {
-        memberService.loadUser(oAuth2UserRequest);
-
+                            @PathVariable String provider) {
+        //memberService.loadUser(oAuth2UserRequest); // OAuth2 로그인 시도 시 OAuth2UserService 구현체 자동 호출
     }
 }
