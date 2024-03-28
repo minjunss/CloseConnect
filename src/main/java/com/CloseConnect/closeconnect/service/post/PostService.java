@@ -1,11 +1,14 @@
 package com.CloseConnect.closeconnect.service.post;
 
 import com.CloseConnect.closeconnect.dto.post.PostDto;
+import com.CloseConnect.closeconnect.dto.post.PostSearchCondition;
 import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.post.Post;
 import com.CloseConnect.closeconnect.repository.member.MemberRepository;
 import com.CloseConnect.closeconnect.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +30,15 @@ public class PostService {
         return new PostDto.Response(post);
     }
 
-    public PostDto.Response findById(Long id) {
+    public PostDto.Response getPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않음. id: " + id));
 
         return new PostDto.Response(post);
+    }
+
+    public Page<PostDto.ResponseList> getPostList(PostSearchCondition postSearchCondition, Pageable pageable) {
+        Page<PostDto.ResponseList> postList = postRepository.getList(postSearchCondition, pageable);
+
+        return postList;
     }
 }

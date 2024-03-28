@@ -64,7 +64,7 @@ class PostControllerTest {
         PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", 1L, "작성자",
                 "2024-03-29 12:00:00", "2024-03-29 12:00:00", null);
 
-        when(postService.findById(postId)).thenReturn(expectedResponse);
+        when(postService.getPost(postId)).thenReturn(expectedResponse);
 
         mockMvc.perform(get(BASE_POST_URI + "/{id}", postId))
                 .andExpect(status().isOk())

@@ -68,7 +68,7 @@ class PostServiceTest {
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
         // When
-        PostDto.Response foundPost = postService.findById(postId);
+        PostDto.Response foundPost = postService.getPost(postId);
 
         // Then
         assertThat(foundPost.id()).isEqualTo(post.getId());
