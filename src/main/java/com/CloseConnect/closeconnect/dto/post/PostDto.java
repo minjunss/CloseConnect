@@ -47,8 +47,8 @@ public class PostDto {
                 post.getContent(),
                 post.getAuthor().getId(),
                 post.getAuthor().getName(),
-                post.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                post.getUpdatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                post.getCreatedTime() != null ? post.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                post.getUpdatedTime() != null ? post.getUpdatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 post.getComments().stream().map(CommentDto.Response::new).collect(Collectors.toList())
             );
         }
