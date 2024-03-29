@@ -1,17 +1,25 @@
 package com.CloseConnect.closeconnect.service.post;
 
 import com.CloseConnect.closeconnect.dto.post.PostDto;
+import com.CloseConnect.closeconnect.dto.post.PostSearchCondition;
 import com.CloseConnect.closeconnect.entity.member.AuthProvider;
 import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.member.Role;
+import com.CloseConnect.closeconnect.entity.post.Post;
 import com.CloseConnect.closeconnect.repository.member.MemberRepository;
 import com.CloseConnect.closeconnect.repository.post.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,12 +34,14 @@ class PostServiceTest {
 
     @Autowired
     private PostService postService;
+    private final String email = "test@test.com";
+    private final Member member = new Member("name", "test@test.com", "abcd1234", AuthProvider.GOOGLE, Role.USER, "Y");
 
     @BeforeEach
     void clean() {
         postRepository.deleteAll();
         memberRepository.deleteAll();
-        memberRepository.save(new Member("name", "test@test.com", "abcd1234", AuthProvider.GOOGLE, Role.USER, "Y"));
+        memberRepository.save(member);
     }
 
     @Test
@@ -41,7 +51,6 @@ class PostServiceTest {
                 .title("title")
                 .content("content")
                 .build();
-        String email = "test@test.com";
 
         Optional<Member> findMember = memberRepository.findByEmail(email);
 
@@ -61,7 +70,6 @@ class PostServiceTest {
                 .title("title")
                 .content("content")
                 .build();
-        String email = "test@test.com";
 
         PostDto.Response post = postService.save(request, email);
 
@@ -77,6 +85,28 @@ class PostServiceTest {
 
     @Test
     void testFindPostList() {
+        //given
+        List<Post> request = IntStream.range(0, 20)
+                .mapToObj(i -> Post.builder()
+                        .author(member)
+                        .title("title" + i)
+                        .content("content" + i)
+                        .build())
+                .toList();
+
+        postRepository.saveAll(request);
+
+        PostSearchCondition postSearchCondition = new PostSearchCondition();
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+
+        //when
+        Page<PostDto.ResponseList> response = postRepository.getList(postSearchCondition, pageable);
+
+        //then
+        assertThat(response.getContent().size()).isEqualTo(10);
+        assertThat(response.getContent().get(0).title()).isEqualTo("title19");
+        assertThat(response.getContent().get(2).title()).isEqualTo("title17");
+
 
     }
 }
