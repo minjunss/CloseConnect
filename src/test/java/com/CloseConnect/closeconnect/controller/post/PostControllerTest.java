@@ -2,6 +2,7 @@ package com.CloseConnect.closeconnect.controller.post;
 
 import com.CloseConnect.closeconnect.WithMockCustomUser;
 import com.CloseConnect.closeconnect.dto.post.PostDto;
+import com.CloseConnect.closeconnect.dto.post.PostSearchCondition;
 import com.CloseConnect.closeconnect.service.post.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -9,9 +10,17 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -72,5 +81,29 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.title").value(expectedResponse.title()))
                 .andExpect(jsonPath("$.content").value(expectedResponse.content()))
                 .andExpect(jsonPath("$.createdTime").value(expectedResponse.createdTime()));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void readPostList() throws Exception {
+        List<PostDto.ResponseList> contentList = new ArrayList<>();
+        contentList.add(new PostDto.ResponseList(1L, "title", "content", "authorName", "updatedTime"));
+        contentList.add(new PostDto.ResponseList(2L, "title2", "content2", "authorName", "updatedTime"));
+        contentList.add(new PostDto.ResponseList(3L, "title3", "content3", "authorName3", "updatedTime"));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<PostDto.ResponseList> mockPage = new PageImpl<>(contentList, pageable, contentList.size());
+
+        when(postService.getPostList(any(PostSearchCondition.class), any(Pageable.class))).thenReturn(mockPage);
+
+        PostSearchCondition postSearchCondition = new PostSearchCondition();
+
+        mockMvc.perform(get(BASE_POST_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postSearchCondition)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.[0].title").value(contentList.get(0).title()))
+                .andExpect(jsonPath("$.content.[1].title").value(contentList.get(1).title()))
+                .andExpect(jsonPath("$.content.[2].title").value(contentList.get(2).title()));
     }
 }
