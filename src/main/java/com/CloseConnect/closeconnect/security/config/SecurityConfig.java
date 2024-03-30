@@ -58,7 +58,7 @@ public class SecurityConfig {
         //요청에 대한 권한 설정
         http.authorizeHttpRequests((authorizeRequests) ->
                 authorizeRequests
-                        .requestMatchers("/oauth2/authorize/**").permitAll()
+                        .requestMatchers("/oauth2/authorize/**", "/ws/**").permitAll()
                         .requestMatchers("/api/test**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                         .anyRequest().authenticated());
@@ -83,16 +83,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
