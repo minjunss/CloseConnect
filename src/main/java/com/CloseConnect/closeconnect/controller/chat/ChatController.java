@@ -20,8 +20,8 @@ public class ChatController {
     private final ChatService chatService;
 
     @MessageMapping("/chat")
-    @SendTo("/sub/chat/{id}")
-    public void broadcasting(ChatDto.Message request) {
+    @SendTo("/sub/chat")
+    public void broadcasting(ChatDto.MessageRequest request) {
         log.info("request : {}}", request);
 
         //서비스로직
@@ -30,8 +30,9 @@ public class ChatController {
 
     //TODO: swagger 설정
     @PostMapping("/createRoom")
-    public ResponseEntity<?> createRoom(@RequestBody ChatDto.Room request) {
-        chatService.createChatRoom(request);
+    public ResponseEntity<?> createRoom(@RequestBody ChatDto.RoomRequest request,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        chatService.createChatRoom(request, userDetails.getUsername());
         return ResponseEntity.ok().build();
     }
 
@@ -39,9 +40,21 @@ public class ChatController {
     @PostMapping("/participate/{roomId}")
     public ResponseEntity<?> participateRoom(@PathVariable String roomId,
                                              @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        chatService.participantRoom(roomId, username);
-
+        chatService.participantRoom(roomId, userDetails.getUsername());
         return ResponseEntity.ok().build();
+    }
+
+    //TODO: swagger설정
+    @PostMapping("/outRoom/{roomId}")
+    public ResponseEntity<?> outRoom(@PathVariable String roomId,
+                                     @AuthenticationPrincipal UserDetails userDetails) {
+        chatService.outRoom(roomId, userDetails.getUsername());
+        return ResponseEntity.ok().build();
+    }
+
+    //TODO: swagger설정
+    @GetMapping("/myChatRooms")
+    public ResponseEntity<?> myChatRoomList(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(chatService.myChatRoomList(userDetails.getUsername()));
     }
 }

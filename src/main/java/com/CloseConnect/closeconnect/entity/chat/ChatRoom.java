@@ -17,19 +17,25 @@ import java.util.List;
 public class ChatRoom {
 
     @Id
-    private ObjectId id;
+    private String id;
     private String name;
     private List<Participant> participantList;
     private LocalDateTime createdTime;
+    private LocalDateTime lastChatTime;
 
     @Builder
-    public ChatRoom(String name, List<Participant> participantList, LocalDateTime createdTime) {
+    public ChatRoom(String name, List<Participant> participantList, LocalDateTime createdTime, LocalDateTime lastChatTime) {
         this.name = name;
         this.participantList = participantList;
         this.createdTime = createdTime;
+        this.lastChatTime = lastChatTime;
     }
 
     public void addParticipant(Participant participant) {
         this.participantList.add(participant);
+    }
+
+    public void setLastChatTime(LocalDateTime chatTime) {
+        this.lastChatTime = chatTime;
     }
 }

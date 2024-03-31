@@ -8,6 +8,6 @@ import lombok.Data;
 @Builder
 @Data
 public class Participant {
-    private String userId;
+    private String email;
     private String userName;
 }
