@@ -16,14 +16,35 @@ public class ChatDto {
     public static class MessageRequest {
         private String roomId;
         private String senderId;
+        private String senderName;
         private String message;
         private LocalDateTime time = LocalDateTime.now();
 
         @Builder
-        public MessageRequest(String roomId, String senderId, String message) {
+        public MessageRequest(String roomId, String senderId, String senderName, String message) {
             this.roomId = roomId;
             this.senderId = senderId;
+            this.senderName = senderName;
             this.message = message;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class MessageResponse {
+        private String roomId;
+        private String senderId;
+        private String senderName;
+        private String message;
+        private String time;
+
+        @Builder
+        public MessageResponse(String roomId, String senderId, String senderName, String message, LocalDateTime time) {
+            this.roomId = roomId;
+            this.senderId = senderId;
+            this.senderName = senderName;
+            this.message = message;
+            this.time = time != null ? time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
     }
 
@@ -41,7 +62,6 @@ public class ChatDto {
     }
 
     @Getter
-
     public static class RoomResponse {
         private final String id;
         private final String name;
