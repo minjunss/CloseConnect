@@ -20,6 +20,7 @@ public class ChatMessage {
     private String message;
     private LocalDateTime time;
     private boolean isDeleted;
+    private LocalDateTime deletedTime;
 
     @Builder
     public ChatMessage(String roomId, String senderId, String senderName, String message, LocalDateTime time) {
@@ -32,5 +33,6 @@ public class ChatMessage {
 
     public void delete() {
         this.isDeleted = true;
+        this.deletedTime = LocalDateTime.now();
     }
 }

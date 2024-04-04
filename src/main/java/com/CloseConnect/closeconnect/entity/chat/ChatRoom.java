@@ -22,6 +22,7 @@ public class ChatRoom {
     private LocalDateTime createdTime;
     private LocalDateTime lastChatTime;
     private boolean isDeleted;
+    private LocalDateTime deletedTime;
 
     @Builder
     public ChatRoom(String name, List<Participant> participantList, LocalDateTime createdTime, LocalDateTime lastChatTime) {
@@ -41,5 +42,6 @@ public class ChatRoom {
 
     public void delete() {
         this.isDeleted = true;
+        this.deletedTime = LocalDateTime.now();
     }
 }
