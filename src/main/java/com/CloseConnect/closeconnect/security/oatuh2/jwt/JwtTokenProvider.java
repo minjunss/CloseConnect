@@ -1,6 +1,8 @@
 package com.CloseConnect.closeconnect.security.oatuh2.jwt;
 
 import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
+import com.CloseConnect.closeconnect.entity.token.Token;
+import com.CloseConnect.closeconnect.repository.token.TokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -39,8 +41,10 @@ public class JwtTokenProvider {
     private Long accessTokenExpirationMinutes;
 
     private final Key key;
+    private final TokenRepository tokenRepository;
 
-    public JwtTokenProvider(@Value("${jwt.key.secret}") String secretKey) {
+    public JwtTokenProvider(TokenRepository tokenRepository, @Value("${jwt.key.secret}") String secretKey) {
+        this.tokenRepository = tokenRepository;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -59,18 +63,26 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
 
         Date now = new Date();
-
+        Date expirationDate = new Date(now.getTime() + accessTokenExpirationMinutes * 60 * 1000);
         //Generate AccessToken
         String accessToken = Jwts.builder()
                 .setSubject(name)
                 .claim(AUTHORITIES_KEY, authorities)
                 .claim("type", TYPE_ACCESS)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + accessTokenExpirationMinutes * 60 * 1000))
+                .setExpiration(expirationDate)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
         log.info("accessToken = " + accessToken);
+
+        //토큰 db 저장
+        Token token = Token.builder()
+                .email(name)
+                .token(accessToken)
+                .expirationTime(expirationDate)
+                .build();
+        tokenRepository.save(token);
 
         return MemberResponseDto.TokenInfo.builder()
                 .grantType(BEARER_TYPE)
@@ -91,8 +103,8 @@ public class JwtTokenProvider {
         //클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
 
         //UserDetails 객체를 만들어서 Authentication 리턴
         UserDetails principal = new User(claims.getSubject(), "", authorities);
@@ -100,21 +112,26 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token");
-            log.info(e.getMessage());
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token");
-            log.info(e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token");
-            log.info(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.");
-            log.info(e.getMessage());
+        Token foundToken = tokenRepository.findByToken(token);
+        if (!foundToken.isBlacklisted()) {
+            try {
+                Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+                return true;
+            } catch (SecurityException | MalformedJwtException e) {
+                log.info("Invalid JWT Token");
+                log.info(e.getMessage());
+            } catch (ExpiredJwtException e) {
+                log.info("Expired JWT Token");
+                log.info(e.getMessage());
+            } catch (UnsupportedJwtException e) {
+                log.info("Unsupported JWT Token");
+                log.info(e.getMessage());
+            } catch (IllegalArgumentException e) {
+                log.info("JWT claims string is empty.");
+                log.info(e.getMessage());
+            }
+        } else {
+            throw new JwtException("Invalid Token. Token is Blacklisted");
         }
         return false;
     }

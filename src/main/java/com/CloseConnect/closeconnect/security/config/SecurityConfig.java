@@ -1,5 +1,6 @@
 package com.CloseConnect.closeconnect.security.config;
 
+import com.CloseConnect.closeconnect.security.oatuh2.CustomLogoutSuccessHandler;
 import com.CloseConnect.closeconnect.security.oatuh2.OAuth2AuthenticationFailureHandler;
 import com.CloseConnect.closeconnect.security.oatuh2.OAuth2AuthenticationSuccessHandler;
 import com.CloseConnect.closeconnect.security.oatuh2.cookie.CookieAuthorizationRequestRepository;
@@ -27,6 +28,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
     private final CookieAuthorizationRequestRepository cookieAuthorizationRequestRepository;
     private final MemberService memberService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
@@ -76,6 +78,10 @@ public class SecurityConfig {
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler)
         );
+
+        http.logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer
+                .logoutUrl("/oauth2/logout")
+                .logoutSuccessHandler(customLogoutSuccessHandler));
 
         //jwt filter 설정
         http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

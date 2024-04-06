@@ -49,6 +49,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
             if (!member.getAuthProvider().equals(authProvider)) {
                 throw new RuntimeException("Email already signed up");
             }
+            member.login();
             updateUser(member, userInfo);
         } else {
             member = registerUser(authProvider, userInfo);
@@ -68,6 +69,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
                 .role(Role.USER)
                 .activityYn("Y")
                 .build();
+        member.login();
         return memberRepository.save(member);
     }
 
