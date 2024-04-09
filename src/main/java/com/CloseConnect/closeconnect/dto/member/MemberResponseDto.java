@@ -15,4 +15,16 @@ public class MemberResponseDto {
         private Long accessTokenExpirationTime;
     }
 
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    public static class ResponseDto {
+        private Long id;
+        private String name;
+        private boolean isLoggedIn;
+        private Double latitude;
+        private Double longitude;
+    }
+
+
 }

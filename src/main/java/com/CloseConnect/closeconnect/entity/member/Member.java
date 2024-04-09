@@ -22,8 +22,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean isLoggedIn;
-    private Double latitude;
-    private Double longitude;
+    private Double latitude; //위도
+    private Double longitude; //경도
     private String activityYn;
 
     @Builder
@@ -49,7 +49,7 @@ public class Member {
         this.isLoggedIn = true;
     }
 
-    public void updateCoordinate(Double latitude, Double longitude) {
+    public void updateCoordinate(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
