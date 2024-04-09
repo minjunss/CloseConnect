@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -22,6 +21,8 @@ public class ChatRoom {
     private List<Participant> participantList;
     private LocalDateTime createdTime;
     private LocalDateTime lastChatTime;
+    private boolean isDeleted;
+    private LocalDateTime deletedTime;
 
     @Builder
     public ChatRoom(String name, List<Participant> participantList, LocalDateTime createdTime, LocalDateTime lastChatTime) {
@@ -37,5 +38,10 @@ public class ChatRoom {
 
     public void setLastChatTime(LocalDateTime chatTime) {
         this.lastChatTime = chatTime;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedTime = LocalDateTime.now();
     }
 }

@@ -21,6 +21,9 @@ public class Member {
     private AuthProvider authProvider;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private boolean isLoggedIn;
+    private Double latitude; //위도
+    private Double longitude; //경도
     private String activityYn;
 
     @Builder
@@ -36,5 +39,18 @@ public class Member {
     public void update(OAuth2UserInfo userInfo) {
         this.name = userInfo.getName();
         this.oauth2Id = userInfo.getOAuth2Id();
+    }
+
+    public void logout() {
+        this.isLoggedIn = false;
+    }
+
+    public void login() {
+        this.isLoggedIn = true;
+    }
+
+    public void updateCoordinate(double latitude, double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }

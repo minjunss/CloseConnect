@@ -16,14 +16,23 @@ public class ChatMessage {
     private String id;
     private String roomId;
     private String senderId;
+    private String senderName;
     private String message;
     private LocalDateTime time;
+    private boolean isDeleted;
+    private LocalDateTime deletedTime;
 
     @Builder
-    public ChatMessage(String roomId, String senderId, String message, LocalDateTime time) {
+    public ChatMessage(String roomId, String senderId, String senderName, String message, LocalDateTime time) {
         this.roomId = roomId;
         this.senderId = senderId;
+        this.senderName = senderName;
         this.message = message;
         this.time = time;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedTime = LocalDateTime.now();
     }
 }
