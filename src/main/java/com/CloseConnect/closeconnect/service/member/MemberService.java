@@ -69,7 +69,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     private Member registerUser(AuthProvider authProvider, OAuth2UserInfo userInfo) {
         Member member = Member.builder()
                 .email(userInfo.getEmail())
-                .name(userInfo.getEmail())
+                .name(userInfo.getName())
                 .oauth2Id(userInfo.getOAuth2Id())
                 .authProvider(authProvider)
                 .role(Role.USER)
@@ -100,5 +100,16 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
 
 
         return nearbyMemberList;
+    }
+
+    public MemberResponseDto.ResponseDto getMyInfo(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원 존재하지 않음. email: " + email));
+        return MemberResponseDto.ResponseDto.builder()
+                .name(member.getName())
+                .email(member.getEmail())
+                .latitude(member.getLatitude())
+                .longitude(member.getLongitude())
+                .build();
     }
 }

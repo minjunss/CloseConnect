@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅방들</title>
+</head>
+<body>
+<div th:insert="~{layout::header}"></div>
+<br>
+<div id="chatRoomList"></div>
+</body>
+<script>
+    getChatRoomList()
+    function getChatRoomList() {
+        fetch('http://localhost:8080/api/chat/chatRoomList', {
+            method : 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data)
+                displayChatRoomList(data);
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            })
+    }
+    function displayChatRoomList(data) {
+        // 데이터를 리스트로 변환하여 출력
+        const chatRoomListDiv = document.getElementById('chatRoomList');
+        const ul = document.createElement('ul');
+
+        data.forEach(chatRoom => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.textContent = chatRoom.name; // 채팅방의 이름을 링크 텍스트로 설정
+            a.setAttribute('href', '#'); // 채팅방으로 이동할 URL 설정
+            a.addEventListener('click', async (event) => {
+                event.preventDefault(); // 기본 동작인 페이지 이동을 막음
+                await participateRoom(chatRoom.id); // 비동기로 참여 요청을 보냄
+                window.location.href = '/view/chatRoom?id=' + chatRoom.id;
+            });
+            li.appendChild(a);
+            ul.appendChild(li);
+        });
+
+        chatRoomListDiv.appendChild(ul);
+    }
+
+    async function participateRoom(roomId) {
+        try {
+            const response = await fetch('http://localhost:8080/api/chat/participate/' + roomId, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error('There was a problem with your fetch operation:', error);
+        }
+    }
+</script>
+</html>

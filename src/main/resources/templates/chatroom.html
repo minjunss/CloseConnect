@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅방</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<style>
+    #chatMessages {
+        width: 33.33%; /* 화면의 1/3 너비 */
+        margin: 0 auto; /* 가운데 정렬 */
+        max-height: 80vh; /* 화면 높이의 80%까지만 허용 */
+        overflow-y: auto; /* 세로 스크롤이 필요한 경우 자동으로 생성 */
+    }
+</style>
+<body>
+<div id="chatContainer">
+    <div id="chatMessages"></div>
+    <input type="text" id="messageInput">
+    <button onclick="sendMessage()">전송</button>
+</div>
+</body>
+<script>
+    window.onload = function() {
+        // 화면이 처음 로드될 때 #chatMessages의 스크롤을 아래로 이동
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('id');
+
+    const socket = new SockJS('/ws/chat');
+    const stompClient = Stomp.over(socket);
+    const header = {
+        Authorization: 'Bearer ' + sessionStorage.getItem('token'),
+        username: sessionStorage.getItem('email')
+    };
+
+    // 채팅 메시지를 전송하는 함수
+    function sendMessage() {
+        if (!stompClient.connected) {
+            console.error('WebSocket 연결이 아직 설정되지 않았습니다.');
+            return;
+        }
+
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value;
+        if (!message) {
+            return;
+        }
+        stompClient.send('/pub/chat', {}, JSON.stringify({
+            "roomId": roomId,
+            "senderId": sessionStorage.getItem('email'),
+            "senderName": sessionStorage.getItem('username'),
+            "message": message
+        }));
+        messageInput.value = '';
+    }
+
+    // 채팅 메시지를 받는 함수
+    function receiveMessage(message) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageElement = document.createElement('p');
+        const messageJson = JSON.parse(message.body);
+        messageElement.textContent = messageJson.message; // JSON.parse()를 사용하여 JSON 문자열을 객체로 변환
+        if (messageJson.senderId === sessionStorage.getItem('email')) {
+            messageElement.style.textAlign = 'right';
+            messageElement.style.color = 'darkgray';
+        }
+        chatMessages.appendChild(messageElement);
+    }
+
+    function displayChatHistory(messages) {
+        const chatMessages = document.getElementById('chatMessages');
+        messages.forEach(message => {
+            const messageElement = document.createElement('p');
+            console.log("==========" + message.senderId)
+            messageElement.textContent = message.message;
+
+            if (message.senderId === sessionStorage.getItem('email')) {
+                messageElement.style.textAlign = 'right';
+                messageElement.style.color = 'darkgray';
+            }
+
+            chatMessages.appendChild(messageElement);
+        });
+    }
+
+    // WebSocket 연결 설정
+    stompClient.connect(header, function () {
+        console.log('WebSocket에 연결되었습니다.');
+
+        // WebSocket 연결이 설정된 후에 채팅 메시지를 구독
+        stompClient.subscribe('/sub/chat', function (message) {
+            receiveMessage(message);
+        });
+
+        // WebSocket 연결이 설정된 후에 채팅 메시지 전송
+        sendMessage();
+
+        // 채팅 메시지 목록을 가져와서 화면에 표시
+        getChatMessageList();
+    });
+
+    function getChatMessageList() {
+        fetch('http://localhost:8080/api/chat/chatMessageList/' + roomId, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayChatHistory(data);
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            })
+    }
+</script>
+</html>

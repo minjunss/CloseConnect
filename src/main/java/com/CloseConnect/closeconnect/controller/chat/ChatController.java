@@ -11,6 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -56,5 +58,16 @@ public class ChatController {
     @GetMapping("/myChatRooms")
     public ResponseEntity<?> myChatRoomList(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(chatService.myChatRoomList(userDetails.getUsername()));
+    }
+
+    @GetMapping("/chatRoomList")
+    public ResponseEntity<?> chatRoomList(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(chatService.chatRoomList());
+    }
+
+    @GetMapping("/chatMessageList/{chatRoomId}")
+    public ResponseEntity<?> chatMessageList(@AuthenticationPrincipal UserDetails userDetails,
+                                             @PathVariable String chatRoomId) {
+        return ResponseEntity.ok(chatService.chatMessageList(chatRoomId));
     }
 }

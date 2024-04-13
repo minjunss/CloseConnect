@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<div th:insert="~{layout::header}"></div>
+
+<a id="chatRoomListPage" th:href="@{/view/chatRoomList}">채팅방목록</a>
+<a id="myChatRoomListPage" th:href="@{/view/myChatRoomList}" style="display: none">내 채팅방 목록</a>
+</body>
+<script>
+    document.getElementById('chatRoomListPage').addEventListener('click', function (event) {
+        if(!sessionStorage.getItem('token')){
+            alert('로그인이 필요합니다.');
+            event.preventDefault();
+        }
+    })
+</script>
+</html>

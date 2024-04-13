@@ -103,4 +103,36 @@ public class ChatService {
     private boolean isExistParticipant(ChatRoom chatRoom, Participant participant) {
         return chatRoom.getParticipantList().stream().anyMatch(existingParticipant -> existingParticipant.getEmail().equals(participant.getEmail()));
     }
+
+    public List<ChatDto.RoomResponse> chatRoomList() {
+        List<ChatRoom> chatRoomList = chatRoomRepository.findByIsDeletedFalse();
+        List<ChatDto.RoomResponse> response = chatRoomList.stream().map(
+                        chatRoom -> ChatDto.RoomResponse.builder()
+                                .id(chatRoom.getId())
+                                .name(chatRoom.getName())
+                                .createdTime(chatRoom.getCreatedTime())
+                                .lastChatTime(chatRoom.getLastChatTime())
+                                .build())
+                .sorted(Comparator.comparing(ChatDto.RoomResponse::getLastChatTime).reversed())
+                .toList();
+
+        return response;
+    }
+
+    public List<ChatDto.MessageResponse> chatMessageList(String roomId) {
+        List<ChatMessage> chatMessageList = chatMessageRepository.findByRoomIdAndIsDeletedFalse(roomId);
+        List<ChatDto.MessageResponse> response = chatMessageList.stream().map(
+                chatMessage -> ChatDto.MessageResponse.builder()
+                        .id(chatMessage.getId())
+                        .message(chatMessage.getMessage())
+                        .senderId(chatMessage.getSenderId())
+                        .senderName(chatMessage.getSenderName())
+                        .roomId(chatMessage.getRoomId())
+                        .time(chatMessage.getTime())
+                        .build())
+                .sorted(Comparator.comparing(ChatDto.MessageResponse::getTime))
+                .toList();
+
+        return response;
+    }
 }

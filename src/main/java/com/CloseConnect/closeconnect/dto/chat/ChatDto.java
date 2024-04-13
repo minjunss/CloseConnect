@@ -32,6 +32,7 @@ public class ChatDto {
     @Data
     @NoArgsConstructor
     public static class MessageResponse {
+        private String id;
         private String roomId;
         private String senderId;
         private String senderName;
@@ -39,7 +40,8 @@ public class ChatDto {
         private String time;
 
         @Builder
-        public MessageResponse(String roomId, String senderId, String senderName, String message, LocalDateTime time) {
+        public MessageResponse(String id, String roomId, String senderId, String senderName, String message, LocalDateTime time) {
+            this.id = id;
             this.roomId = roomId;
             this.senderId = senderId;
             this.senderName = senderName;

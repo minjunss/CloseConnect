@@ -11,4 +11,5 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     List<ChatRoom> findByParticipantListEmail(String email);
 
     List<ChatRoom> findByIsDeletedTrue();
+    List<ChatRoom> findByIsDeletedFalse();
 }

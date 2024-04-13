@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<header>
+    <div th:fragment="header" style="display: flex">
+        <a href="#" id="myInfo" style="margin-inline: auto;"></a>
+        <div class = 'loginHeader' style="margin-right: 20px;">
+            <a th:href="@{/view/loginPage}">로그인</a>
+        </div>
+        <div class = 'logoutHeader' style="margin-right:20px;display:none">
+            <a href="#" onclick="logout()">로그아웃</a>
+        </div>
+
+        <script>
+            let token = sessionStorage.getItem('token');
+            document.addEventListener('DOMContentLoaded', function () {
+                if (token != null) {
+                    document.querySelector('.loginHeader').style.display = 'none';
+                    document.querySelector('.logoutHeader').style.display = 'inline-block';
+                    document.getElementById('myInfo').textContent = sessionStorage.getItem('username');
+                    document.getElementById('myChatRoomListPage').style.display = 'block';
+                }
+            });
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(setPosition);
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+            }
+
+            function setPosition(position) {
+                const data = {"latitude": position.coords.latitude,
+                              "longitude": position.coords.longitude,
+                              "radius": null};
+
+                fetch("http://localhost:8080/api/member/updateCoordinate", {
+                    method: 'POST',
+                    headers: {'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                              'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response;
+                    })
+                    .then(data => {
+                        console.log("현재 위치:");
+                        console.log("위도: " + position.coords.latitude);
+                        console.log("경도: " + position.coords.longitude);
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with your fetch operation:', error);
+                    });
+            }
+
+            function logout() {
+                if (token == null) {
+                    return false;
+                }
+                fetch('http://localhost:8080/oauth2/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                    })
+                    .then(data => {
+                        console.log(data);
+                        sessionStorage.clear();
+                        location.href='http://localhost:8080/view/home';
+                    })
+                    .catch(error =>{
+                        console.error('There was a problem with your fetch operation:', error);
+                    })
+            }
+        </script>
+    </div>
+</header>
+</body>
+</html>

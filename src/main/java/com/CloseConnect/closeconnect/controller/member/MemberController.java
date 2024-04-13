@@ -18,6 +18,11 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @GetMapping("/myInfo")
+    public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(memberService.getMyInfo(userDetails.getUsername()));
+    }
+
     @PostMapping("/updateCoordinate")
     public ResponseEntity<?> updateCoordinate(@AuthenticationPrincipal UserDetails userDetails,
                                               @RequestBody LocationDto locationDto) {
