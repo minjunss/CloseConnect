@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
-    @Query("SELECT new com.CloseConnect.closeconnect.dto.member.MemberResponseDto$ResponseDto(m.id, m.name, m.isLoggedIn, m.latitude, m.longitude) " +
+    @Query("SELECT new com.CloseConnect.closeconnect.dto.member.MemberResponseDto$ResponseDto(m.id, m.name, m.email, m.isLoggedIn, m.latitude, m.longitude) " +
             "from Member m " +
             "where function('ST_DISTANCE_SPHERE', " +
             "function('POINT', m.longitude, m.latitude)," +

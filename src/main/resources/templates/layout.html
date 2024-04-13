@@ -6,6 +6,7 @@
 <body>
 <header>
     <div th:fragment="header" style="display: flex">
+        <a th:href="@{/view/home}">홈</a>
         <a href="#" id="myInfo" style="margin-inline: auto;"></a>
         <div class = 'loginHeader' style="margin-right: 20px;">
             <a th:href="@{/view/loginPage}">로그인</a>
@@ -21,7 +22,6 @@
                     document.querySelector('.loginHeader').style.display = 'none';
                     document.querySelector('.logoutHeader').style.display = 'inline-block';
                     document.getElementById('myInfo').textContent = sessionStorage.getItem('username');
-                    document.getElementById('myChatRoomListPage').style.display = 'block';
                 }
             });
 

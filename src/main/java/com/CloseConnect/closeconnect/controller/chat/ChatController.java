@@ -34,8 +34,7 @@ public class ChatController {
     @PostMapping("/createRoom")
     public ResponseEntity<?> createRoom(@RequestBody ChatDto.RoomRequest request,
                                         @AuthenticationPrincipal UserDetails userDetails) {
-        chatService.createChatRoom(request, userDetails.getUsername());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(chatService.createChatRoom(request, userDetails.getUsername()));
     }
 
     //TODO: swagger 설정

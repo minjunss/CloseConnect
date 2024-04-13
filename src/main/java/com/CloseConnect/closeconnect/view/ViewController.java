@@ -33,6 +33,11 @@ public class ViewController {
         return "myChatRoomList";
     }
 
+    @GetMapping("/nearbyMembers")
+    public String nearByMembers() {
+        return "nearbyMembers";
+    }
+
     @GetMapping("/chatRoom")
     public String chatRoom() {
         return "chatroom";

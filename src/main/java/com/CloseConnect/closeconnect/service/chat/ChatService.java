@@ -43,7 +43,7 @@ public class ChatService {
         messagingTemplate.convertAndSend("/sub/chat", chatMessage);
     }
 
-    public void createChatRoom(ChatDto.RoomRequest request, String email) {
+    public ChatDto.RoomResponse createChatRoom(ChatDto.RoomRequest request, String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 사용자 email: " + email));
 
@@ -54,6 +54,10 @@ public class ChatService {
                 .lastChatTime(request.getLastChatTime())
                 .build();
         chatRoomRepository.save(chatRoom);
+
+        return ChatDto.RoomResponse.builder()
+                .id(chatRoom.getId())
+                .build();
     }
 
     public void participantRoom(String roomId, String email) {

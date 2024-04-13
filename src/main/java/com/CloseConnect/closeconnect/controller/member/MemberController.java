@@ -32,7 +32,7 @@ public class MemberController {
 
     @GetMapping("/nearby")
     public ResponseEntity<?> getNearbyMembers(@AuthenticationPrincipal UserDetails userDetails,
-                                              @RequestBody LocationDto locationDto,
+                                              LocationDto locationDto,
                                               Pageable pageable) {
         Page<MemberResponseDto.ResponseDto> nearbyMemberList = memberService.getNearbyMemberList(userDetails.getUsername(), locationDto, pageable);
 
