@@ -4,6 +4,8 @@ import com.CloseConnect.closeconnect.dto.post.PostDto;
 import com.CloseConnect.closeconnect.dto.post.PostSearchCondition;
 import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.post.Post;
+import com.CloseConnect.closeconnect.global.exception.BusinessException;
+import com.CloseConnect.closeconnect.global.exception.ExceptionCode;
 import com.CloseConnect.closeconnect.repository.member.MemberRepository;
 import com.CloseConnect.closeconnect.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class PostService {
     @Transactional
     public PostDto.Response save(PostDto.Request request, String email) {
         Member author = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원 존재하지 않음. email: " + email));
+                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
         Post post = request.toEntity(author);
         postRepository.save(post);
 
@@ -31,7 +33,7 @@ public class PostService {
     }
 
     public PostDto.Response getPost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 글이 존재하지 않음. id: " + id));
+        Post post = postRepository.findById(id).orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_POST, String.valueOf(id)));
 
         return new PostDto.Response(post);
     }

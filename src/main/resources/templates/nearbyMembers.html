@@ -97,7 +97,9 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    })
                 }
                 return response.json();
             })
@@ -222,7 +224,17 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    if (response.status === 409) {
+                        return response.json().then(data => {
+                            const split = data.message.split('value: ');
+                            const roomId = split[1];
+                            window.location.href = '/view/chatRoom?id=' + roomId;
+                        });
+                    }else {
+                        return response.json().then(data => {
+                            throw new Error(data.message);
+                        });
+                    }
                 }
                 return response.json();
             })

@@ -20,15 +20,15 @@
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.json().then(data => {
+                    throw new Error(data.message);
+                })
             }
             return response.json();
         })
         .then(data => {
             sessionStorage.setItem('username', data.name);
             sessionStorage.setItem('email', data.email);
-            sessionStorage.setItem('longitude', data.longitude)
-            sessionStorage.setItem('latitude', data.latitude)
 
             window.location.href = redirectUri;
         })

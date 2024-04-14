@@ -23,12 +23,13 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    })
                 }
                 return response.json();
             })
             .then(data => {
-                console.log(data)
                 displayChatRoomList(data);
             })
             .catch(error => {
@@ -66,7 +67,9 @@
                 }
             });
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.json().then(data => {
+                    throw new Error(data.message);
+                })
             }
             const data = await response.json();
             console.log(data);
@@ -90,7 +93,9 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    })
                 }
                 return response.json();
             })

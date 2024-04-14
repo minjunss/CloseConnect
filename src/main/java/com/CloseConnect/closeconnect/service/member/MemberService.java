@@ -5,6 +5,8 @@ import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.entity.member.AuthProvider;
 import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.member.Role;
+import com.CloseConnect.closeconnect.global.exception.BusinessException;
+import com.CloseConnect.closeconnect.global.exception.ExceptionCode;
 import com.CloseConnect.closeconnect.security.oatuh2.OAuth2UserInfo;
 import com.CloseConnect.closeconnect.security.oatuh2.OAuth2UserInfoFactory;
 import com.CloseConnect.closeconnect.security.oatuh2.UserPrincipal;
@@ -45,7 +47,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
 
         // 이메일이 없으면 예외 발생
         if (!StringUtils.hasText(userInfo.getEmail())) {
-            throw new RuntimeException("Email not found from OAuth2 provider");
+            throw new BusinessException(ExceptionCode.OAUTH2_EMAIL_NOT_FOUND, null);
         }
         // OAuth2 사용자 정보로 회원 조회
         Member member = memberRepository.findByEmail(userInfo.getEmail()).orElse(null);
@@ -53,7 +55,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         // 회원이 존재하지 않으면 회원 등록, 존재하면 회원 정보 업데이트
         if (member != null) {
             if (!member.getAuthProvider().equals(authProvider)) {
-                throw new RuntimeException("Email already signed up");
+                throw new BusinessException(ExceptionCode.ALREADY_SIGNED_UP, member.getEmail());
             }
             member.login();
             updateUser(member, userInfo);
@@ -87,24 +89,18 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
 
     public void updateCoordinate(String email, LocationDto locationDto) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원 존재하지 않음. email: " + email));
+                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
         member.updateCoordinate(locationDto.getLatitude(), locationDto.getLongitude());
         memberRepository.save(member);
     }
 
     public Page<MemberResponseDto.ResponseDto> getNearbyMemberList(String email, LocationDto locationDto, Pageable pageable) {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원 존재하지 않음. email: " + email));
-
-        Page<MemberResponseDto.ResponseDto> nearbyMemberList = memberRepository.findNearbyMemberList(member.getLatitude(), member.getLongitude(), locationDto.getRadius(), email, pageable);
-
-
-        return nearbyMemberList;
+        return memberRepository.findNearbyMemberList(locationDto.getLatitude(), locationDto.getLongitude(), locationDto.getRadius(), email, pageable);
     }
 
     public MemberResponseDto.ResponseDto getMyInfo(String email) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원 존재하지 않음. email: " + email));
+                .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
         return MemberResponseDto.ResponseDto.builder()
                 .name(member.getName())
                 .email(member.getEmail())

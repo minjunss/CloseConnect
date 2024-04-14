@@ -113,7 +113,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         Token foundToken = tokenRepository.findByToken(token);
-        if (!foundToken.isBlacklisted()) {
+        if (foundToken != null && !foundToken.isBlacklisted()) {
             try {
                 Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
                 return true;

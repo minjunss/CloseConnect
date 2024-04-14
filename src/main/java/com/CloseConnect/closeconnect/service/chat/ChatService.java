@@ -3,8 +3,11 @@ package com.CloseConnect.closeconnect.service.chat;
 import com.CloseConnect.closeconnect.dto.chat.ChatDto;
 import com.CloseConnect.closeconnect.entity.chat.ChatMessage;
 import com.CloseConnect.closeconnect.entity.chat.ChatRoom;
+import com.CloseConnect.closeconnect.entity.chat.ChatRoomType;
 import com.CloseConnect.closeconnect.entity.chat.Participant;
 import com.CloseConnect.closeconnect.entity.member.Member;
+import com.CloseConnect.closeconnect.global.exception.BusinessException;
+import com.CloseConnect.closeconnect.global.exception.ExceptionCode;
 import com.CloseConnect.closeconnect.repository.chat.ChatMessageRepository;
 import com.CloseConnect.closeconnect.repository.chat.ChatRoomRepository;
 import com.CloseConnect.closeconnect.repository.member.MemberRepository;
@@ -24,7 +27,7 @@ public class ChatService {
 
     public void saveChat(ChatDto.MessageRequest request) {
         ChatRoom chatRoom = chatRoomRepository.findById(request.getRoomId()).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 채팅방"));
+                () -> new BusinessException(ExceptionCode.NOT_EXIST_CHATROOM, request.getRoomId()));
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .message(request.getMessage())
@@ -43,7 +46,17 @@ public class ChatService {
 
     public ChatDto.RoomResponse createChatRoom(ChatDto.RoomRequest request, String email) {
         Member creator = memberRepository.findByEmail(email).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 사용자 email: " + email));
+                () -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
+
+        if (request.getChatRoomType() == ChatRoomType.PRIVATE) {
+            Member receiver = memberRepository.findByEmail(request.getReceiverEmail()).orElseThrow(
+                    () -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
+            ChatRoom existChatRoom = chatRoomRepository.findByChatRoomTypeAndIsDeletedIsFalseAndParticipantListEmailIn(
+                    request.getChatRoomType(), List.of(creator.getEmail(), receiver.getEmail())).orElse(null);
+            if (existChatRoom != null) {
+                throw new BusinessException(ExceptionCode.ALREADY_JOINED_ROOM, existChatRoom.getId());
+            }
+        }
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(request.getName())
@@ -64,9 +77,9 @@ public class ChatService {
 
     public void participantRoom(String roomId, String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 사용자 email: " + email));
+                () -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 ChatRoom id: " + roomId));
+                () -> new BusinessException(ExceptionCode.NOT_EXIST_CHATROOM, roomId));
         Participant participant = new Participant(member.getEmail(), member.getName());
 
         boolean existParticipant = isExistParticipant(chatRoom, participant);
@@ -75,12 +88,12 @@ public class ChatService {
             chatRoom.addParticipant(participant);
             chatRoomRepository.save(chatRoom);
         } else {
-            throw new IllegalStateException("이미 참여중인 방");
+            throw new BusinessException(ExceptionCode.ALREADY_JOINED_ROOM, roomId);
         }
     }
     public void outRoom(String roomId, String email) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 채팅방 id: " + roomId));
+                () -> new BusinessException(ExceptionCode.NOT_EXIST_CHATROOM, roomId));
 
         chatRoom.getParticipantList().removeIf(participant -> participant.getEmail().equals(email));
         if (chatRoom.getParticipantList().isEmpty()) {
