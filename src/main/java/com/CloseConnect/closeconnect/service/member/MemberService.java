@@ -96,7 +96,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원 존재하지 않음. email: " + email));
 
-        Page<MemberResponseDto.ResponseDto> nearbyMemberList = memberRepository.findNearbyMemberList(member.getLatitude(), member.getLongitude(), locationDto.getRadius(), pageable);
+        Page<MemberResponseDto.ResponseDto> nearbyMemberList = memberRepository.findNearbyMemberList(member.getLatitude(), member.getLongitude(), locationDto.getRadius(), email, pageable);
 
 
         return nearbyMemberList;

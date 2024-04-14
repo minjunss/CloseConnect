@@ -1,5 +1,6 @@
 package com.CloseConnect.closeconnect.dto.chat;
 
+import com.CloseConnect.closeconnect.entity.chat.ChatRoomType;
 import com.CloseConnect.closeconnect.entity.chat.Participant;
 import lombok.*;
 
@@ -54,12 +55,15 @@ public class ChatDto {
     @NoArgsConstructor
     public static class RoomRequest {
         private String name;
+        private ChatRoomType chatRoomType;
+        private String receiverEmail;
         private List<Participant> participantList = new ArrayList<>();
         private LocalDateTime createdTime = LocalDateTime.now();
         private LocalDateTime lastChatTime = LocalDateTime.now();
 
-        public RoomRequest(String name) {
+        public RoomRequest(String name, ChatRoomType chatRoomType) {
             this.name = name;
+            this.chatRoomType = chatRoomType;
         }
     }
 
@@ -67,13 +71,17 @@ public class ChatDto {
     public static class RoomResponse {
         private final String id;
         private final String name;
+        private final ChatRoomType chatRoomType;
+        private final List<Participant> participantList;
         private final String createdTime;
         private final String lastChatTime;
 
         @Builder
-        public RoomResponse (String id, String name, LocalDateTime createdTime, LocalDateTime lastChatTime) {
+        public RoomResponse (String id, String name, ChatRoomType chatRoomType, List<Participant> participantList, LocalDateTime createdTime, LocalDateTime lastChatTime) {
             this.id = id;
             this.name = name;
+            this.chatRoomType = chatRoomType;
+            this.participantList = participantList;
             this.createdTime = createdTime != null ? createdTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             this.lastChatTime = lastChatTime != null ? lastChatTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }

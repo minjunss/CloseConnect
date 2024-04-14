@@ -29,5 +29,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompHandler);
+        registration.taskExecutor().corePoolSize(10);
+        registration.taskExecutor().maxPoolSize(20);
     }
 }

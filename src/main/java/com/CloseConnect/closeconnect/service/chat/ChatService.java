@@ -12,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,15 +42,19 @@ public class ChatService {
     }
 
     public ChatDto.RoomResponse createChatRoom(ChatDto.RoomRequest request, String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(
+        Member creator = memberRepository.findByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 사용자 email: " + email));
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(request.getName())
-                .participantList(Collections.singletonList(new Participant(member.getEmail(), member.getName())))
+                .chatRoomType(request.getChatRoomType())
+                .participantList(new ArrayList<>(List.of(new Participant(creator.getEmail(), creator.getName()))))
                 .createdTime(request.getCreatedTime())
                 .lastChatTime(request.getLastChatTime())
                 .build();
+        if (request.getReceiverEmail() != null) {
+            chatRoom.addParticipant(new Participant(request.getReceiverEmail(), request.getName()));
+        }
         chatRoomRepository.save(chatRoom);
 
         return ChatDto.RoomResponse.builder()
@@ -93,6 +95,8 @@ public class ChatService {
                 chatRoom -> ChatDto.RoomResponse.builder()
                         .id(chatRoom.getId())
                         .name(chatRoom.getName())
+                        .chatRoomType(chatRoom.getChatRoomType())
+                        .participantList(chatRoom.getParticipantList())
                         .createdTime(chatRoom.getCreatedTime())
                         .lastChatTime(chatRoom.getLastChatTime())
                         .build())

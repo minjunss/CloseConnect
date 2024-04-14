@@ -26,6 +26,7 @@
                 return response.json();
             })
             .then(data => {
+                console.log(data)
                 displayChatRoomList(data);
             })
             .catch(error => {
@@ -42,6 +43,15 @@
             const li = document.createElement('li');
             const a = document.createElement('a');
             a.textContent = chatRoom.name; // 채팅방의 이름을 링크 텍스트로 설정
+            if (chatRoom.chatRoomType === "PRIVATE") {
+                a.textContent += "(1:1)"
+                chatRoom.participantList.forEach(participant => {
+                    if (participant.email === sessionStorage.getItem('email')) {
+                        return;
+                    }
+                    a.textContent = participant.userName + "(1:1)";
+                });
+            }
             a.setAttribute('href', '#'); // 채팅방으로 이동할 URL 설정
             a.addEventListener('click', async (event) => {
                 event.preventDefault(); // 기본 동작인 페이지 이동을 막음

@@ -65,7 +65,7 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <p>선택한 회원: <span id="selectedMemberName"></span></p>
-        <a href="#">대화하기</a>
+        <a href="#" onclick="createPrivateChatRoom()">대화하기</a>
         <!-- 이하 대화 입력 창 등 추가 요소 -->
     </div>
 </div>
@@ -123,14 +123,14 @@
 
             // 클릭 이벤트 추가
             anchorTag.addEventListener("click", function() {
-                showChatDialog(member.name); // 대화하기 창 표시 함수 호출
+                showChatDialog(member.name, member.email); // 대화하기 창 표시 함수 호출
             });
 
             nearbyMemberList.appendChild(anchorTag);
         });
     }
 
-    function showChatDialog(memberName) {
+    function showChatDialog(memberName, memberEmail) {
         // 대화하기 모달 창 요소 가져오기
         const modal = document.getElementById("chatModal");
         // 대화하기 모달 내용 요소 가져오기
@@ -140,6 +140,7 @@
 
         // 선택한 회원 이름 업데이트
         selectedMemberName.textContent = memberName;
+        selectedMemberName.setAttribute('email', memberEmail);
 
         // 대화하기 모달 창 표시
         modal.style.display = "block";
@@ -201,6 +202,36 @@
             }
         });
         paginationDiv.appendChild(nextButton);
+    }
+
+
+    function createPrivateChatRoom() {
+        const selectedMemberName = document.getElementById('selectedMemberName');
+        console.log(selectedMemberName.textContent)
+        if(!selectedMemberName.textContent) return;
+        const data = {"name":selectedMemberName.textContent,
+                      "receiverEmail": selectedMemberName.getAttribute('email'),
+                      "chatRoomType": "PRIVATE"};
+        fetch('http://localhost:8080/api/chat/createRoom', {
+            method : 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                window.location.href = '/view/chatRoom?id=' + data.id;
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            })
     }
 
 </script>

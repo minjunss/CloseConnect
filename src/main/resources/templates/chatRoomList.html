@@ -9,7 +9,7 @@
 <br>
 
 <input type="text" id="chatRoomInput" placeholder="채팅방 이름">
-<button onclick="createChatRoom()">만들기</button>
+<button onclick="createOpenChatRoom()">만들기</button>
 <div id="chatRoomList"></div>
 </body>
 <script>
@@ -75,10 +75,11 @@
         }
     }
 
-    function createChatRoom() {
+    function createOpenChatRoom() {
         const chatRoomInput = document.getElementById('chatRoomInput');
         if(!chatRoomInput.value) return;
-        const data = {"name":chatRoomInput.value};
+        const data = {"name":chatRoomInput.value,
+                      "chatRoomType": "PUBLIC"};
         fetch('http://localhost:8080/api/chat/createRoom', {
             method : 'POST',
             headers: {
