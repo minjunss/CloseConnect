@@ -1,8 +1,7 @@
 package com.CloseConnect.closeconnect.security.config;
 
-import com.CloseConnect.closeconnect.security.oatuh2.CustomLogoutSuccessHandler;
-import com.CloseConnect.closeconnect.security.oatuh2.OAuth2AuthenticationFailureHandler;
-import com.CloseConnect.closeconnect.security.oatuh2.OAuth2AuthenticationSuccessHandler;
+import com.CloseConnect.closeconnect.repository.member.MemberRepository;
+import com.CloseConnect.closeconnect.security.handler.*;
 import com.CloseConnect.closeconnect.security.oatuh2.cookie.CookieAuthorizationRequestRepository;
 import com.CloseConnect.closeconnect.security.oatuh2.jwt.JwtAuthenticationFilter;
 import com.CloseConnect.closeconnect.security.oatuh2.jwt.JwtTokenProvider;
@@ -31,6 +30,7 @@ public class SecurityConfig {
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
     private final CookieAuthorizationRequestRepository cookieAuthorizationRequestRepository;
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
@@ -61,8 +61,10 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeRequests) ->
                 authorizeRequests
                         .requestMatchers("/oauth2/authorize/**", "/ws/**").permitAll()
-                        .requestMatchers("/api/test**").permitAll()
+                        .requestMatchers("/image/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
+                        .requestMatchers("/view/**").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated());
 
         //OAuth2Login 설정
@@ -84,7 +86,11 @@ public class SecurityConfig {
                 .logoutSuccessHandler(customLogoutSuccessHandler));
 
         //jwt filter 설정
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, memberRepository), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
+                );
 
         return http.build();
     }

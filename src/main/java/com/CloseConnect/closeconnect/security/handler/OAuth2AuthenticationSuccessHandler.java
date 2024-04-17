@@ -1,4 +1,4 @@
-package com.CloseConnect.closeconnect.security.oatuh2;
+package com.CloseConnect.closeconnect.security.handler;
 
 import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.security.oatuh2.cookie.CookieAuthorizationRequestRepository;
@@ -37,7 +37,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         // 인증 성공 후 리다이렉트할 대상 URL 결정
         String targetUrl = determineTargetUrl(request, response, authentication);
-        targetUrl = "http://" + cookieAuthorizationRequestRepository.extractRedirectUri(targetUrl);
+        //targetUrl = "http://" + cookieAuthorizationRequestRepository.extractRedirectUri(targetUrl);
 
         // 이미 응답이 전송되었는지 확인하고 처리
         if (response.isCommitted()) {

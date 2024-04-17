@@ -21,6 +21,7 @@ public class MemberResponseDto {
     public static class ResponseDto {
         private Long id;
         private String name;
+        private String email;
         private boolean isLoggedIn;
         private Double latitude;
         private Double longitude;

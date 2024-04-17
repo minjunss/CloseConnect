@@ -15,13 +15,15 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
-    @Query("SELECT new com.CloseConnect.closeconnect.dto.member.MemberResponseDto$ResponseDto(m.id, m.name, m.isLoggedIn, m.latitude, m.longitude) " +
+    @Query("SELECT new com.CloseConnect.closeconnect.dto.member.MemberResponseDto$ResponseDto(m.id, m.name, m.email, m.isLoggedIn, m.latitude, m.longitude) " +
             "from Member m " +
-            "where function('ST_DISTANCE_SPHERE', " +
+            "where m.email <> :email and " +
+            "function('ST_DISTANCE_SPHERE', " +
             "function('POINT', m.longitude, m.latitude)," +
             "function('POINT', :myLongitude, :myLatitude)) <= :radius * 1000")
     Page<MemberResponseDto.ResponseDto> findNearbyMemberList(@Param("myLatitude") double myLatitude,
                                                              @Param("myLongitude") double myLongitude,
                                                              @Param("radius") double radius,
+                                                             @Param("email") String email,
                                                              Pageable pageable);
 }

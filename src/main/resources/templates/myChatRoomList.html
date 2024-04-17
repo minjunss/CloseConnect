@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 채팅방 리스트</title>
+</head>
+<body>
+<div th:insert="~{layout::header}"></div>
+<br>
+<div id="myChatRoomList"></div>
+</body>
+<script>
+    getChatRoomList();
+
+    function getChatRoomList() {
+        fetch('http://localhost:8080/api/chat/myChatRooms', {
+            method : 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    })
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayChatRoomList(data);
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            })
+    }
+
+    function displayChatRoomList(data) {
+        // 데이터를 리스트로 변환하여 출력
+        const chatRoomListDiv = document.getElementById('myChatRoomList');
+        const ul = document.createElement('ul');
+
+        data.forEach(chatRoom => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.textContent = chatRoom.name; // 채팅방의 이름을 링크 텍스트로 설정
+            if (chatRoom.chatRoomType === "PRIVATE") {
+                a.textContent += "(1:1)"
+                chatRoom.participantList.forEach(participant => {
+                    if (participant.email === sessionStorage.getItem('email')) {
+                        return;
+                    }
+                    a.textContent = participant.userName + "(1:1)";
+                });
+            }
+            a.setAttribute('href', '#'); // 채팅방으로 이동할 URL 설정
+            a.addEventListener('click', async (event) => {
+                event.preventDefault(); // 기본 동작인 페이지 이동을 막음
+                window.location.href = '/view/chatRoom?id=' + chatRoom.id;
+            });
+            li.appendChild(a);
+            ul.appendChild(li);
+        });
+
+        chatRoomListDiv.appendChild(ul);
+    }
+</script>
+</html>

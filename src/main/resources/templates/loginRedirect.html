@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUri = urlParams.get('redirect_uri');
+    const token = urlParams.get('token');
+
+    if(token !== '') {
+        sessionStorage.setItem('token', token);
+    }
+
+    fetch('http://localhost:8080/api/member/myInfo', {
+        method : 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message);
+                })
+            }
+            return response.json();
+        })
+        .then(data => {
+            sessionStorage.setItem('username', data.name);
+            sessionStorage.setItem('email', data.email);
+
+            window.location.href = redirectUri;
+        })
+        .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+        })
+</script>
+</html>

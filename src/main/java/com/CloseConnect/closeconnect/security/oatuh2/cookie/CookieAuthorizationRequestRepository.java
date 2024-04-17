@@ -30,8 +30,10 @@ public class CookieAuthorizationRequestRepository implements AuthorizationReques
         }
 
         CookieUtils.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, CookieUtils.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS);
-        String redirectUrlAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
+        //String redirectUrlAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
+        String urlBeforeLogin = extractRedirectUri(request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME));
         //String redirectUrlAfterLogin = "http://localhost:8080/test1"; //임시
+        String redirectUrlAfterLogin = "http://localhost:8080/view/loginRedirect?redirect_uri=" + urlBeforeLogin;
         if (StringUtils.isNotBlank(redirectUrlAfterLogin)) {
             CookieUtils.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUrlAfterLogin, COOKIE_EXPIRE_SECONDS);
         }

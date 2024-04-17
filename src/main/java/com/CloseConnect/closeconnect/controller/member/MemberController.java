@@ -18,6 +18,11 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @GetMapping("/myInfo")
+    public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(memberService.getMyInfo(userDetails.getUsername()));
+    }
+
     @PostMapping("/updateCoordinate")
     public ResponseEntity<?> updateCoordinate(@AuthenticationPrincipal UserDetails userDetails,
                                               @RequestBody LocationDto locationDto) {
@@ -27,7 +32,7 @@ public class MemberController {
 
     @GetMapping("/nearby")
     public ResponseEntity<?> getNearbyMembers(@AuthenticationPrincipal UserDetails userDetails,
-                                              @RequestBody LocationDto locationDto,
+                                              LocationDto locationDto,
                                               Pageable pageable) {
         Page<MemberResponseDto.ResponseDto> nearbyMemberList = memberService.getNearbyMemberList(userDetails.getUsername(), locationDto, pageable);
 

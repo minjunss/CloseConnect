@@ -54,7 +54,7 @@ public class StompHandler implements ChannelInterceptor {
 
     @EventListener
     public void handleWebSocketDisconnectionListener(SessionDisconnectEvent event) {
-        log.info("사용자 퇴장");
+
     }
 
 

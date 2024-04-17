@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+</head>
+<style>
+    .login-container {
+        position: relative;
+        width: 100%; /* 부모 요소의 너비 */
+        height: 100vh; /* 화면 전체 높이 */
+        display: flex;
+        justify-content: center; /* 수평 가운데 정렬 */
+        align-items: center; /* 수직 가운데 정렬 */
+        flex-direction: column;
+    }
+    .login-link img {
+        width: 300px;
+        height: auto;
+        display: block;
+        margin-bottom: 10px;
+    }
+</style>
+<body>
+    <div class="login-container">
+        <a class="login-link"
+           href="http://localhost:8080/oauth2/authorize/google?redirect_uri=http://localhost:8080/oauth2/callback/google?redirect_uri=http://localhost:8080/view/home">
+            <img th:src="@{/image/web_light_sq_SI@2x.png}">
+        </a>
+        <a class="login-link"
+           href="http://localhost:8080/oauth2/authorize/naver?redirect_uri=http://localhost:8080/oauth2/callback/naver?redirect_uri=http://localhost:8080/view/home">
+            <img th:src="@{/image/btnG_official.png}">
+        </a>
+        <a class="login-link"
+           href="http://localhost:8080/oauth2/authorize/kakao?redirect_uri=http://localhost:8080/oauth2/callback/kakao?redirect_uri=http://localhost:8080/view/home">
+            <img th:src="@{/image/kakao_login_medium_narrow.png}">
+        </a>
+        <a href="/home">홈으로</a>
+    </div>
+</body>
+<script></script>
+</html>
