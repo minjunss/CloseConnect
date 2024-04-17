@@ -1,4 +1,4 @@
-package com.CloseConnect.closeconnect.security.oatuh2;
+package com.CloseConnect.closeconnect.security.handler;
 
 import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.security.oatuh2.cookie.CookieAuthorizationRequestRepository;

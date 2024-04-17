@@ -2,11 +2,14 @@ package com.CloseConnect.closeconnect.security.oatuh2.jwt;
 
 import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.entity.token.Token;
+import com.CloseConnect.closeconnect.global.exception.BusinessException;
+import com.CloseConnect.closeconnect.global.exception.ExceptionCode;
 import com.CloseConnect.closeconnect.repository.token.TokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +43,7 @@ public class JwtTokenProvider {
     @Value("${jwt.access-token-expiration-minutes}")
     private Long accessTokenExpirationMinutes;
 
+    @Getter
     private final Key key;
     private final TokenRepository tokenRepository;
 
@@ -118,20 +122,34 @@ public class JwtTokenProvider {
                 Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
                 return true;
             } catch (SecurityException | MalformedJwtException e) {
-                log.info("Invalid JWT Token");
-                log.info(e.getMessage());
+                throw new BusinessException(ExceptionCode.INVALID_JWT_TOKEN, token);
             } catch (ExpiredJwtException e) {
-                log.info("Expired JWT Token");
                 log.info(e.getMessage());
+                throw new BusinessException(ExceptionCode.EXPIRED_JWT_TOKEN, token);
             } catch (UnsupportedJwtException e) {
-                log.info("Unsupported JWT Token");
                 log.info(e.getMessage());
+                throw new BusinessException(ExceptionCode.UNSUPPORTED_JWT_TOKEN, token);
             } catch (IllegalArgumentException e) {
-                log.info("JWT claims string is empty.");
                 log.info(e.getMessage());
+                throw new BusinessException(ExceptionCode.EMPTY_JWT_CLAIMS, token);
             }
         } else {
-            throw new JwtException("Invalid Token. Token is Blacklisted");
+            throw new BusinessException(ExceptionCode.BLACKLIST_TOKEN, token);
+        }
+    }
+
+    public boolean validateTokenWithServletRequest(HttpServletRequest request, String token) {
+        Token foundToken = tokenRepository.findByToken(token);
+        if (foundToken != null && !foundToken.isBlacklisted()) {
+            try {
+                Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+                return true;
+            } catch (SecurityException | MalformedJwtException | IllegalArgumentException | UnsupportedJwtException |
+                     ExpiredJwtException e) {
+                request.setAttribute("exception", e);
+            }
+        } else {
+            request.setAttribute("exception", new BusinessException(ExceptionCode.BLACKLIST_TOKEN, token));
         }
         return false;
     }

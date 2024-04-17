@@ -1,4 +1,4 @@
-package com.CloseConnect.closeconnect.security.oatuh2;
+package com.CloseConnect.closeconnect.security.handler;
 
 import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.token.Token;

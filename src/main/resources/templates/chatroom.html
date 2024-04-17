@@ -107,7 +107,6 @@
         const chatMessages = document.getElementById('chatMessages');
         messages.forEach(message => {
             const messageElement = document.createElement('p');
-            console.log("==========" + message.senderId)
             messageElement.textContent = message.message;
 
             if (message.senderId === sessionStorage.getItem('email')) {

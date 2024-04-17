@@ -28,7 +28,6 @@
                 return response.json();
             })
             .then(data => {
-                console.log(data)
                 displayChatRoomList(data);
             })
             .catch(error => {

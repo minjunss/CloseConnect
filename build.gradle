@@ -40,6 +40,9 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	//gson
+	implementation 'com.google.code.gson:gson:2.9.0'
+
 	//mysql
 	runtimeOnly 'com.mysql:mysql-connector-j'
 

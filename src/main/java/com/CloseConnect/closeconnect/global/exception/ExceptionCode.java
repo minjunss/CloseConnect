@@ -6,6 +6,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ExceptionCode {
+    BLACKLIST_TOKEN(401, "Token is Blacklisted", null),
+    INVALID_JWT_TOKEN(401, "Invalid JWT Token", null),
+    EXPIRED_JWT_TOKEN(401, "Expired JWT Token", null),
+    UNSUPPORTED_JWT_TOKEN(401, "Unsupported JWT Token", null),
+    EMPTY_JWT_CLAIMS(400, "JWT claims string is empty", null),
     ALREADY_SIGNED_UP(404, "이미 가입된 이메일입니다.", null),
     NOT_EXIST_MEMBER(404, "존재하지 않는 회원입니다.", null),
     NOT_EXIST_CHATROOM(404, "존재하지 않는 채팅방입니다.", null),
