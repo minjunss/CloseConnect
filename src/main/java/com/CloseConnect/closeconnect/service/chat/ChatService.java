@@ -50,7 +50,7 @@ public class ChatService {
 
         if (request.getChatRoomType() == ChatRoomType.PRIVATE) {
             Member receiver = memberRepository.findByEmail(request.getReceiverEmail()).orElseThrow(
-                    () -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
+                    () -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, request.getReceiverEmail()));
             ChatRoom existChatRoom = chatRoomRepository.findByChatRoomTypeAndIsDeletedIsFalseAndParticipantListEmailIn(
                     request.getChatRoomType(), List.of(creator.getEmail(), receiver.getEmail())).orElse(null);
             if (existChatRoom != null) {
@@ -125,8 +125,8 @@ public class ChatService {
         return chatRoom.getParticipantList().stream().anyMatch(existingParticipant -> existingParticipant.getEmail().equals(participant.getEmail()));
     }
 
-    public List<ChatDto.RoomResponse> chatRoomList() {
-        List<ChatRoom> chatRoomList = chatRoomRepository.findByIsDeletedFalse();
+    public List<ChatDto.RoomResponse> openChatRoomList() {
+        List<ChatRoom> chatRoomList = chatRoomRepository.findByChatRoomTypeAndIsDeletedFalse(ChatRoomType.PUBLIC);
         List<ChatDto.RoomResponse> response = chatRoomList.stream().map(
                         chatRoom -> ChatDto.RoomResponse.builder()
                                 .id(chatRoom.getId())

@@ -113,7 +113,7 @@ class ChatControllerTest {
         expectedResponse.add(new ChatDto.RoomResponse("test3", "테스트방3", ChatRoomType.PUBLIC, new ArrayList<>(), null, null));
         expectedResponse.add(new ChatDto.RoomResponse("test4", "테스트방4", ChatRoomType.PRIVATE, new ArrayList<>(), null, null));
 
-        when(chatService.chatRoomList()).thenReturn(expectedResponse);
+        when(chatService.openChatRoomList()).thenReturn(expectedResponse);
 
         mockMvc.perform(get(BASE_POST_URI + "/chatRoomList")
                         .accept(MediaType.APPLICATION_JSON)

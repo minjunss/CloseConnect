@@ -13,7 +13,7 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     List<ChatRoom> findByParticipantListEmail(String email);
 
     List<ChatRoom> findByIsDeletedTrue();
-    List<ChatRoom> findByIsDeletedFalse();
+    List<ChatRoom> findByChatRoomTypeAndIsDeletedFalse(ChatRoomType chatRoomType);
 
     Optional<ChatRoom> findByChatRoomTypeAndIsDeletedIsFalseAndParticipantListEmailIn(ChatRoomType chatRoomType, List<String> emails);
 }
