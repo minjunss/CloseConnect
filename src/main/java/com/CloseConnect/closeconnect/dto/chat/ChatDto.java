@@ -61,6 +61,7 @@ public class ChatDto {
         private LocalDateTime createdTime = LocalDateTime.now();
         private LocalDateTime lastChatTime = LocalDateTime.now();
 
+        @Builder
         public RoomRequest(String name, ChatRoomType chatRoomType) {
             this.name = name;
             this.chatRoomType = chatRoomType;

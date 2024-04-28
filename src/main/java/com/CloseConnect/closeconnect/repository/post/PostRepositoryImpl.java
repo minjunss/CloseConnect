@@ -24,13 +24,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public Page<PostDto.ResponseList> getList(PostSearchCondition postSearchCondition, Pageable pageable) {
         BooleanBuilder whereBuilder = new BooleanBuilder();
         if (postSearchCondition.getTitle() != null) {
-            whereBuilder.and(post.title.eq(postSearchCondition.getTitle()));
+            whereBuilder.and(post.title.contains(postSearchCondition.getTitle()));
         }
         if (postSearchCondition.getContent() != null) {
-            whereBuilder.and(post.content.eq(postSearchCondition.getContent()));
+            whereBuilder.and(post.content.contains(postSearchCondition.getContent()));
         }
         if (postSearchCondition.getAuthor() != null) {
-            whereBuilder.and(post.author.name.eq(postSearchCondition.getAuthor()));
+            whereBuilder.and(post.author.name.contains(postSearchCondition.getAuthor()));
         }
 
         List<PostDto.ResponseList> content = jpaQueryFactory
