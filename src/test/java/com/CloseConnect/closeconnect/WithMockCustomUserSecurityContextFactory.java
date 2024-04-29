@@ -1,4 +1,4 @@
-package com.CloseConnect;
+package com.CloseConnect.closeconnect;
 
 import com.CloseConnect.closeconnect.WithMockCustomUser;
 import com.CloseConnect.closeconnect.entity.member.AuthProvider;
