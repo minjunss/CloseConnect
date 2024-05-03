@@ -32,7 +32,8 @@ public class PostController {
             description = "글 등록 성공",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PostDto.Response.class))
     )
-    public ResponseEntity<?> createPost(@RequestBody PostDto.Request request,
+    public ResponseEntity<?> createPost(@RequestHeader("Authorization") String token,
+                                        @RequestBody PostDto.Request request,
                                         @AuthenticationPrincipal UserDetails UserDetails) {
         return ResponseEntity.ok(postService.save(request, UserDetails.getUsername()));
     }
