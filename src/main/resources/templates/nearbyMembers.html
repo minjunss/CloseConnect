@@ -65,6 +65,7 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <p>선택한 회원: <span id="selectedMemberName"></span></p>
+        <p>회원과의 거리: <span id="DistanceSelectedMember"></span></p>
         <a href="#" onclick="createPrivateChatRoom()">대화하기</a>
         <!-- 이하 대화 입력 창 등 추가 요소 -->
     </div>
@@ -125,24 +126,50 @@
 
             // 클릭 이벤트 추가
             anchorTag.addEventListener("click", function() {
-                showChatDialog(member.name, member.email); // 대화하기 창 표시 함수 호출
+                //showChatDialog(member.name, member.email); // 대화하기 창 표시 함수 호출
+                const data = {"email": member.email};
+                fetch('http://localhost:8080/api/member/distanceBetweenMembers', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('API 호출 중 오류 발생');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // 거리 정보를 포함하여 모달 창 표시 함수 호출
+                        showChatDialog(member.name, member.email, data);
+                    })
+                    .catch(error => {
+                        console.error('API 호출 중 오류 발생:', error);
+                    });
             });
 
             nearbyMemberList.appendChild(anchorTag);
         });
     }
 
-    function showChatDialog(memberName, memberEmail) {
+    function showChatDialog(memberName, memberEmail, distance) {
         // 대화하기 모달 창 요소 가져오기
         const modal = document.getElementById("chatModal");
         // 대화하기 모달 내용 요소 가져오기
         const modalContent = document.querySelector(".modal-content");
         // 선택한 회원 이름 표시 요소 가져오기
         const selectedMemberName = document.getElementById("selectedMemberName");
+        // 선택한 회원과의 거리 표시 요소 가져오기
+        const distanceElement = document.getElementById("DistanceSelectedMember");
 
         // 선택한 회원 이름 업데이트
         selectedMemberName.textContent = memberName;
         selectedMemberName.setAttribute('email', memberEmail);
+        // 선택한 회원간의 거리 표시
+        distanceElement.textContent = distance + "km";
 
         // 대화하기 모달 창 표시
         modal.style.display = "block";

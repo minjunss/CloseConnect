@@ -6,6 +6,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,8 +26,10 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean isLoggedIn;
-    private Double latitude; //위도
-    private Double longitude; //경도
+    //    private Double latitude; //위도
+//    private Double longitude; //경도
+    @Column(columnDefinition = "POINT SRID 4326")
+    private Point location;
     private String activityYn;
 
     @Builder
@@ -50,7 +56,7 @@ public class Member {
     }
 
     public void updateCoordinate(double latitude, double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        this.location = geometryFactory.createPoint(new Coordinate(longitude, latitude));
     }
 }

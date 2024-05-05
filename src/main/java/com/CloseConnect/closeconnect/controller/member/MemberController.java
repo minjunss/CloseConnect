@@ -1,8 +1,11 @@
 package com.CloseConnect.closeconnect.controller.member;
 
 import com.CloseConnect.closeconnect.dto.member.LocationDto;
+import com.CloseConnect.closeconnect.dto.member.MemberRequestDto;
 import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.service.member.MemberService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/myInfo")
     @Operation(summary = "내 정보 조회 API", description = "토큰으로 내 정보 조회")
@@ -65,5 +69,21 @@ public class MemberController {
         Page<MemberResponseDto.ResponseDto> nearbyMemberList = memberService.getNearbyMemberList(userDetails.getUsername(), locationDto, pageable);
 
         return ResponseEntity.ok(nearbyMemberList);
+    }
+
+    @PostMapping("/distanceBetweenMembers")
+    @Operation(summary = "사용자와 다른 회원간의 거리 조회 API", description = "사용자와 다른 회원간의 거리 조회")
+    @ApiResponse(
+            responseCode = "200",
+            description = "회원간의 거리 조회 성공",
+            content = @Content(mediaType = "application/json"
+            )
+    )
+    public ResponseEntity<?> getDistanceBetweenMembers(@RequestHeader("Authorization") String token,
+                                                       @AuthenticationPrincipal UserDetails userDetails,
+                                                       @RequestBody MemberRequestDto memberRequestDto) throws JsonProcessingException {
+        double distanceBetweenMembers = memberService.getDistanceBetweenMembers(userDetails.getUsername(), memberRequestDto.getEmail());
+
+        return ResponseEntity.ok(objectMapper.writeValueAsString(distanceBetweenMembers));
     }
 }

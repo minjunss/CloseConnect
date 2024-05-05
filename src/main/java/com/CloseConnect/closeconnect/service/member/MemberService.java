@@ -104,8 +104,13 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         return MemberResponseDto.ResponseDto.builder()
                 .name(member.getName())
                 .email(member.getEmail())
-                .latitude(member.getLatitude())
-                .longitude(member.getLongitude())
+                .latitude(member.getLocation() != null ? member.getLocation().getY() : null)
+                .longitude(member.getLocation() != null ? member.getLocation().getX() : null)
                 .build();
+    }
+
+    public double getDistanceBetweenMembers(String myEmail, String otherEmail) {
+        Double distanceBetweenMembers = memberRepository.findDistanceBetweenMembers(myEmail, otherEmail);
+        return distanceBetweenMembers == 0.0 ? 0.1 : distanceBetweenMembers;
     }
 }

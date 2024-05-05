@@ -3,6 +3,7 @@ package com.CloseConnect.closeconnect.dto.member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 public class MemberResponseDto {
 
@@ -23,8 +24,8 @@ public class MemberResponseDto {
         private String name;
         private String email;
         private boolean isLoggedIn;
-        private Double latitude;
-        private Double longitude;
+        private Object latitude;
+        private Object longitude;
     }
 
 

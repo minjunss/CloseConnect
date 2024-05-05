@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,6 +81,33 @@ class MemberRepositoryTest {
         //then
         assertThat(nearbyMemberList.getTotalElements()).isNotZero();
         assertThat(nearbyMemberList.getContent().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void findDistanceBetweenMembersTest() throws Exception {
+        //given
+        double myLatitude = 37.52951;
+        double myLongitude = 126.8446;
+        double otherLatitude = 37.529525;
+        double otherLongitude = 126.8455;
+
+        String myEmail = "test1@test.com";
+        String otherEmail = "test2@test.com";
+
+        Member member = new Member("testName", myEmail, "testOAuth2Id", AuthProvider.GOOGLE, Role.USER, "Y");
+        member.updateCoordinate(myLatitude, myLongitude);
+        memberRepository.save(member);
+
+        Member member2 = new Member("testName2", otherEmail, "testOAuth2Id2", AuthProvider.KAKAO, Role.USER, "Y");
+        member2.updateCoordinate(otherLatitude, otherLongitude);
+        memberRepository.save(member2);
+
+        //when
+        Double distanceBetweenMembers = memberRepository.findDistanceBetweenMembers(myEmail, otherEmail);
+
+        //then
+        if(distanceBetweenMembers == 0.0) distanceBetweenMembers = 0.1;
+        System.out.println("distanceBetweenMembers = " + distanceBetweenMembers);
     }
 }
 
