@@ -1,6 +1,5 @@
 package com.CloseConnect.closeconnect.repository.member;
 
-import com.CloseConnect.closeconnect.config.QueryDslConfig;
 import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.entity.member.AuthProvider;
 import com.CloseConnect.closeconnect.entity.member.Member;
@@ -8,17 +7,12 @@ import com.CloseConnect.closeconnect.entity.member.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;

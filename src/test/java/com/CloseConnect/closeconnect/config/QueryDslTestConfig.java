@@ -7,12 +7,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
-public class QueryDslConfig {
+public class QueryDslTestConfig {
     @PersistenceContext
-    private EntityManager entityManager;
+    private EntityManager testEntityManager;
 
     @Bean
-    public JPAQueryFactory jpaQueryFactory(){
-        return new JPAQueryFactory(entityManager);
+    public JPAQueryFactory testJpaQueryFactory(){
+        return new JPAQueryFactory(testEntityManager);
     }
 }

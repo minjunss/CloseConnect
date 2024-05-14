@@ -59,6 +59,7 @@ class PostControllerTest {
         mockMvc.perform(post(BASE_POST_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(expectedResponse.id()))
@@ -75,7 +76,8 @@ class PostControllerTest {
 
         when(postService.getPost(postId)).thenReturn(expectedResponse);
 
-        mockMvc.perform(get(BASE_POST_URI + "/{id}", postId))
+        mockMvc.perform(get(BASE_POST_URI + "/{id}", postId)
+                        .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(expectedResponse.id()))
                 .andExpect(jsonPath("$.title").value(expectedResponse.title()))
@@ -99,6 +101,7 @@ class PostControllerTest {
 
         mockMvc.perform(get(BASE_POST_URI)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                         .content(objectMapper.writeValueAsString(postSearchCondition)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
