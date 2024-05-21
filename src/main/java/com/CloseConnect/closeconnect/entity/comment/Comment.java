@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -25,11 +27,21 @@ public class Comment extends BaseTime {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
+    private boolean isDeleted;
+    private LocalDateTime deletedTime;
 
     @Builder
     public Comment(String content, Member author, Post post) {
         this.content = content;
         this.author = author;
         this.post = post;
+    }
+
+    public void update(String content) {
+        this.content = content;
+    }
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedTime = LocalDateTime.now();
     }
 }

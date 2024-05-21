@@ -111,4 +111,77 @@ class PostServiceTest {
 
 
     }
+
+    @Test
+    void testGetPostsByEmail() {
+        //given
+        Member member2 = new Member("name2", "test2@test.com", "abcd1234", AuthProvider.GOOGLE, Role.USER, "Y");
+        memberRepository.save(member2);
+
+        List<Post> request = IntStream.range(0, 10)
+                .mapToObj(i -> Post.builder()
+                        .author(member)
+                        .title("title" + i)
+                        .content("content" + i)
+                        .build())
+                .toList();
+        postRepository.saveAll(request);
+
+        List<Post> request2 = IntStream.range(0, 10)
+                .mapToObj(i -> Post.builder()
+                        .author(member2)
+                        .title("title" + i)
+                        .content("content" + i)
+                        .build())
+                .toList();
+        postRepository.saveAll(request2);
+
+        //when
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+        Page<PostDto.ResponseList> response = postService.getPostsByEmail(member.getEmail(), pageable);
+
+        //then
+        assertThat(response.getContent().size()).isEqualTo(10);
+    }
+
+    @Test
+    void testUpdatePost() {
+        //given
+        Post post = Post.builder()
+                .author(member)
+                .title("title")
+                .content("content")
+                .build();
+        Post savedPost = postRepository.save(post);
+
+        PostDto.Request request = PostDto.Request.builder()
+                .title(null)
+                .content("updateTest")
+                .build();
+
+        //when
+        postService.update(savedPost.getId(), request);
+        Optional<Post> updatedPost = postRepository.findById(savedPost.getId());
+
+        //then
+        assertThat(updatedPost.get().getContent()).isEqualTo("updateTest");
+    }
+
+    @Test
+    void testDelete() {
+        //given
+        Post post = Post.builder()
+                .author(member)
+                .title("title")
+                .content("content")
+                .build();
+        Post savedPost = postRepository.save(post);
+
+        //when
+        postService.delete(savedPost.getId());
+        Optional<Post> deletedPost = postRepository.findById(savedPost.getId());
+
+        //then
+        assertThat(deletedPost.get().isDeleted()).isTrue();
+    }
 }

@@ -4,6 +4,8 @@ import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.entity.member.AuthProvider;
 import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.member.Role;
+import com.CloseConnect.closeconnect.repository.comment.CommentRepository;
+import com.CloseConnect.closeconnect.repository.post.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +24,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MemberRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
     @BeforeEach
     void clean() {
+        commentRepository.deleteAll();
+        postRepository.deleteAll();
         memberRepository.deleteAll();
     }
 

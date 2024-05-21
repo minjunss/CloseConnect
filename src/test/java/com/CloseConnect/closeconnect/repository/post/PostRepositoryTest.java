@@ -39,7 +39,7 @@ class PostRepositoryTest {
     }
 
     @Test
-    public void getListTest() throws Exception {
+    public void testGetList() throws Exception {
         //given
         Member member = new Member("testName", "test@test.com", "testOAuth2Id", AuthProvider.GOOGLE, Role.USER, "Y");
         memberRepository.save(member);
@@ -57,5 +57,25 @@ class PostRepositoryTest {
 
         //then
         assertThat(response.getContent().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testFindByEmail() {
+        //given
+        Member member = new Member("testName", "test@test.com", "testOAuth2Id", AuthProvider.GOOGLE, Role.USER, "Y");
+        memberRepository.save(member);
+
+        Post post = new Post(member, "testTitle", "testContent");
+        Post post2 = new Post(member, "testTitle2", "testContent2");
+        Post post3 = new Post(member, "gadf34", "testContent3");
+
+        postRepository.saveAll(List.of(post, post2, post3));
+
+        //when
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<PostDto.ResponseList> response = postRepository.findByEmail(member.getEmail(), pageable);
+
+        //then
+        assertThat(response.getContent().size()).isEqualTo(3);
     }
 }

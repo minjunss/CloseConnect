@@ -16,13 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class PostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
 
-    @Transactional
     public PostDto.Response save(PostDto.Request request, String email) {
         Member author = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
@@ -32,15 +31,34 @@ public class PostService {
         return new PostDto.Response(post);
     }
 
+    public void update(Long postId, PostDto.Request request) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_POST, String.valueOf(postId)));
+        post.update(request.getContent());
+    }
+
+    public void delete(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_POST, String.valueOf(postId)));
+        post.delete();
+    }
+
+    @Transactional(readOnly = true)
     public PostDto.Response getPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_POST, String.valueOf(id)));
 
         return new PostDto.Response(post);
     }
 
+    @Transactional(readOnly = true)
     public Page<PostDto.ResponseList> getPostList(PostSearchCondition postSearchCondition, Pageable pageable) {
         Page<PostDto.ResponseList> postList = postRepository.getList(postSearchCondition, pageable);
 
         return postList;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostDto.ResponseList> getPostsByEmail(String email, Pageable pageable) {
+        Page<PostDto.ResponseList> response = postRepository.findByEmail(email, pageable);
+
+        return response;
     }
 }
