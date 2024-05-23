@@ -34,8 +34,34 @@ public class PostController {
     )
     public ResponseEntity<?> createPost(@RequestHeader("Authorization") String token,
                                         @RequestBody PostDto.Request request,
-                                        @AuthenticationPrincipal UserDetails UserDetails) {
-        return ResponseEntity.ok(postService.save(request, UserDetails.getUsername()));
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(postService.save(request, userDetails.getUsername()));
+    }
+    @PatchMapping("/update/{id}")
+    @Operation(summary = "글 수정 API", description = "글 내용 수정")
+    @ApiResponse(
+            responseCode = "200",
+            description = "글 내용 수정 성공"
+    )
+    public ResponseEntity<?> updatePost(@RequestHeader("Authorization") String token,
+                                        @PathVariable Long id,
+                                        @RequestBody PostDto.Request request,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        postService.update(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/delete/{id}")
+    @Operation(summary = "글 삭제 API", description = "글 삭제")
+    @ApiResponse(
+            responseCode = "200",
+            description = "글 삭제 성공"
+    )
+    public ResponseEntity<?> deletePost(@RequestHeader("Authorization") String token,
+                                        @PathVariable Long id,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        postService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
