@@ -1,5 +1,6 @@
 package com.CloseConnect.closeconnect.entity.member;
 
+import com.CloseConnect.closeconnect.entity.BaseTime;
 import com.CloseConnect.closeconnect.security.oatuh2.OAuth2UserInfo;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Member {
+public class Member extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

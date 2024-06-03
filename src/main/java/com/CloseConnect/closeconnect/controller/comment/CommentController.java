@@ -27,7 +27,7 @@ public class CommentController {
     @Operation(summary = "댓글 등록 API")
     @ApiResponse(
             responseCode = "200",
-            description = "글 등록 성공",
+            description = "댓글 등록 성공",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDto.Response.class))
     )
     public ResponseEntity<?> createComment(@RequestHeader("Authorization") String token,

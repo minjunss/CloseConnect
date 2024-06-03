@@ -5,7 +5,6 @@
     <title>채팅방</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script src="all.js"></script>
     <style>
         #chatContainer {
             display: flex;
@@ -56,6 +55,17 @@
         const chatMessages = document.getElementById('chatMessages');
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+    // 메시지 입력란 요소 가져오기
+    const messageInput = document.getElementById('messageInput');
+
+    // 메시지 입력란에 keyup 이벤트 리스너 추가
+    messageInput.addEventListener('keyup', function(event) {
+        // 눌러진 키가 엔터 키인지 확인
+        if (event.key === 'Enter' && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+            // sendMessage 함수 호출
+            sendMessage();
+        }
+    });
 
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -63,6 +73,7 @@
 
     const socket = new SockJS('/ws/chat');
     const stompClient = Stomp.over(socket);
+    stompClient.debug = null; // 또는 stompClient.debug = false;
     const header = {
         Authorization: 'Bearer ' + sessionStorage.getItem('token'),
         username: sessionStorage.getItem('email')

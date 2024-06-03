@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,7 @@ public class PostController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PostDto.Response.class))
     )
     public ResponseEntity<?> createPost(@RequestHeader("Authorization") String token,
-                                        @RequestBody PostDto.Request request,
+                                        @Valid @RequestBody PostDto.Request request,
                                         @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(postService.save(request, userDetails.getUsername()));
     }
@@ -83,7 +84,10 @@ public class PostController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class)
             )
     )
-    public Page<?> readPostList(@RequestBody PostSearchCondition postSearchCondition, Pageable pageable) {
+    public Page<?> readPostList(@RequestParam(required = false) String title,
+                                @RequestParam(required = false) String content,
+                                @RequestParam(required = false) String author, Pageable pageable) {
+        PostSearchCondition postSearchCondition = new PostSearchCondition(title, content, author);
         return postService.getPostList(postSearchCondition, pageable);
     }
 }

@@ -4,6 +4,8 @@ import com.CloseConnect.closeconnect.dto.comment.CommentDto;
 import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.post.Post;
 import com.querydsl.core.annotations.QueryProjection;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +21,11 @@ public class PostDto {
     @AllArgsConstructor
     @Builder
     public static class Request {
+        @NotBlank
+        @NotNull
         private String title;
+        @NotBlank
+        @NotNull
         private String content;
 
         public Post toEntity(Member author) {
@@ -35,7 +41,7 @@ public class PostDto {
             Long id,
             String title,
             String content,
-            Long authorId,
+            String email,
             String authorName,
             String createdTime,
             String updatedTime,
@@ -46,7 +52,7 @@ public class PostDto {
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
-                post.getAuthor().getId(),
+                post.getAuthor().getEmail(),
                 post.getAuthor().getName(),
                 post.getCreatedTime() != null ? post.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 post.getUpdatedTime() != null ? post.getUpdatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),

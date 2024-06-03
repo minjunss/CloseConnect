@@ -34,6 +34,7 @@ public class CommentDto {
         private final Long id;
         private final String content;
         private final String authorName;
+        private final String email;
         private final Long authorId;
         private final Long postId;
         private final String createdTime;
@@ -44,6 +45,7 @@ public class CommentDto {
             this.id = comment.getId();
             this.content = comment.getContent();
             this.authorName = comment.getAuthor().getName();
+            this.email = comment.getAuthor().getEmail();
             this.authorId = comment.getAuthor().getId();
             this.postId = comment.getPost().getId();
             this.createdTime = comment.getCreatedTime() != null ? comment.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

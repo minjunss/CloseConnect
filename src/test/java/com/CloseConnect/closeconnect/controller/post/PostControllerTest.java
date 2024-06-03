@@ -48,7 +48,7 @@ class PostControllerTest {
     @WithMockCustomUser
     void createPost() throws Exception {
         PostDto.Request request = new PostDto.Request("제목", "내용");
-        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", 1L, "이름",
+        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", "email", "이름",
                 "2024-03-29 12:00:00", "2024-03-29 12:00:00", null);
 
         when(postService.save(any(PostDto.Request.class), any(String.class))).thenReturn(expectedResponse);
@@ -98,7 +98,7 @@ class PostControllerTest {
     @WithMockCustomUser
     void readPost() throws Exception {
         Long postId = 1L;
-        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", 1L, "작성자",
+        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", "email", "작성자",
                 "2024-03-29 12:00:00", "2024-03-29 12:00:00", null);
 
         when(postService.getPost(any(Long.class))).thenReturn(expectedResponse);

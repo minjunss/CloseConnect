@@ -10,14 +10,21 @@
 <a id="chatRoomListPage" th:href="@{/view/chatRoomList}">오픈채팅방목록</a>
 <a id="myChatRoomListPage" th:href="@{/view/myChatRoomList}" style="display: block">내 채팅방 목록</a>
 <a id="nearbyMemberListPage" th:href="@{/view/nearbyMembers}" style="display: block">가까운 회원들</a>
+<a id="postListPage" th:href="@{/view/postList}" style="display: block">게시판 글 목록</a>
 </body>
 <script>
-    document.getElementById('chatRoomListPage').addEventListener('click', function (event) {
-        if(!sessionStorage.getItem('token')){
-            alert('로그인이 필요합니다.');
-            event.preventDefault();
+    const preventIds = ['chatRoomListPage', 'postListPage'];
+    preventIds.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('click', function (event) {
+                if (!sessionStorage.getItem('token')) {
+                    alert('로그인이 필요합니다.');
+                    event.preventDefault();
+                }
+            });
         }
-    })
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         if (!sessionStorage.getItem('token')) {

@@ -30,7 +30,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                 .from(comment)
                 .where(comment.post.id.eq(postId)
                         .and(comment.isDeleted.eq(false)))
-                .orderBy(comment.updatedTime.desc())
+                .orderBy(comment.updatedTime.asc())
                 .limit(pageable.getPageSize())
                 .offset(pageable.getOffset())
                 .fetch();

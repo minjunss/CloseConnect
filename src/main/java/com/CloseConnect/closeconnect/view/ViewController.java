@@ -42,4 +42,21 @@ public class ViewController {
     public String chatRoom() {
         return "chatroom";
     }
+
+    @GetMapping("/postList")
+    public String post() {
+        return "postList";
+    }
+
+    @GetMapping("/writePost")
+    public String writePost() {
+        return "writePost";
+    }
+
+    @GetMapping("/post")
+    public String postDetail() {
+        return "post";
+    }
+
+
 }
