@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        /* 모달 스타일 */
+        .modal {
+            display: none; /* 초기에는 숨김 */
+            position: fixed; /* 고정 위치 */
+            z-index: 1; /* 다른 요소 위에 표시 */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* 스크롤 가능 */
+            background-color: rgba(0, 0, 0, 0.4); /* 배경 투명도 */
+        }
+
+        .modal-content {
+            background-color: #fefefe; /* 모달 내용 배경색 */
+            margin: 15% auto; /* 중앙 정렬 */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* 모달 너비 */
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            resize: none;
+        }
+
+        .form-group button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .comment-container {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .comment-container p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .comment-container small {
+            display: block;
+            margin-top: 5px;
+            color: #777;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="~{layout::header}"></div>
+<br>
+<div class="form-container">
+    <h4></h4>
+    <h2></h2>
+    <div class="form-group">
+        <label for="content"></label>
+        <p id="content"></p>
+    </div>
+    <div class="form-group button-container">
+        <button id="goUpdatePage" style="display: none">수정</button>
+    </div>
+</div>
+
+<div class="form-container" id="comments-container">
+    <!-- 댓글 목록이 여기에 표시됩니다 -->
+</div>
+
+<div class="pagination" id="pagination-container">
+    <!-- 페이지 네이션 버튼이 여기에 표시됩니다 -->
+</div>
+
+<div class="form-container">
+    <div class="form-group">
+        <label for="comment">댓글</label>
+        <textarea id="comment"></textarea>
+    </div>
+    <div class="form-group button-container">
+        <button id="addComment" onclick="submitComment()">완료</button>
+    </div>
+</div>
+
+<!-- 대화하기 모달 창 -->
+<div id="chatModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>선택한 회원: <span id="selectedMemberName"></span></p>
+        <p>회원과의 거리: <span id="DistanceSelectedMember"></span></p>
+        <a href="#" onclick="createPrivateChatRoom()">대화하기</a>
+        <!-- 이하 대화 입력 창 등 추가 요소 -->
+    </div>
+</div>
+
+<script>
+    let currentPage = 0;
+    const pageSize = 10;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getPost();
+    });
+
+    function getPost() {
+        const queryString = window.location.search;
+        const params = new URLSearchParams(queryString);
+        const postId = params.get('id');
+
+        fetch(`http://localhost:8080/api/posts/${postId}`, {
+            method : 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('content').innerText = data.content;
+                document.title = data.title;
+                document.querySelector('.form-container h2').innerText = data.title;
+                document.querySelector('.form-container h4').innerText = data.authorName;
+
+                getTotalPages(postId);
+
+                if (data.email === sessionStorage.getItem('email')) {
+                    document.getElementById('goUpdatePage').style.display = 'block'
+                }
+
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            });
+    }
+
+    function getTotalPages(postId) {
+        fetch(`http://localhost:8080/api/comment/listByPost/${postId}?size=${pageSize}`, {
+            method : 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+            },
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('API 호출 중 오류 발생');
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentPage = data.totalPages - 1; // 마지막 페이지로 설정
+                getComments(currentPage);
+            })
+            .catch(error => {
+                console.error('API 호출 중 오류 발생:', error);
+            });
+    }
+
+    function submitComment() {
+        const queryString = window.location.search;
+        const params = new URLSearchParams(queryString);
+        const postId = params.get('id');
+        const content = document.getElementById('comment').value;
+        const data = {"postId": postId, "content": content};
+
+        fetch('http://localhost:8080/api/comment/create', {
+            method : 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type' : 'application/json'
+            },
+            body   : JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('API 호출 중 오류 발생');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('comment').value = ''; // 입력 필드 비우기
+                getComments(currentPage); // 댓글 목록 갱신
+            })
+            .catch(error => {
+                console.error('API 호출 중 오류 발생:', error);
+            });
+
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function test(authorName, email) {
+        const data = {"email": email};
+        fetch('http://localhost:8080/api/member/distanceBetweenMembers', {
+            method : 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type' : 'application/json'
+            },
+            body   : JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('API 호출 중 오류 발생');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 거리 정보를 포함하여 모달 창 표시 함수 호출
+                showChatDialog(authorName, email, data);
+            })
+            .catch(error => {
+                console.error('API 호출 중 오류 발생:', error);
+            });
+    }
+
+    function getComments(page = 0, size = pageSize) {
+        const queryString = window.location.search;
+        const params = new URLSearchParams(queryString);
+        const postId = params.get('id');
+
+        const pageParams = new URLSearchParams({
+            page: page,
+            size: size
+        });
+
+        fetch(`http://localhost:8080/api/comment/listByPost/${postId}?${pageParams.toString()}`, {
+            method : 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+            },
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('API 호출 중 오류 발생');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const commentsContainer = document.getElementById('comments-container');
+                commentsContainer.innerHTML = ''; // 이전 댓글 목록 지우기
+
+                data.content.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'comment-container';
+                    const isCurrentUser = sessionStorage.getItem('email') === comment.email; // 현재 사용자인지 확인
+
+                    if (isCurrentUser) {
+                        // 현재 사용자와 댓글 작성자가 같으면 링크를 표시하지 않음
+                        commentElement.innerHTML = `
+                            <p>${comment.content}</p>
+                            <small>${comment.authorName} - ${new Date(comment.createdTime).toLocaleString()}</small>
+                        `;
+                    } else {
+                        // 현재 사용자와 댓글 작성자가 다르면 링크를 표시함
+                        commentElement.innerHTML = `
+                            <p>${comment.content}</p>
+                            <small><a href="#" onclick="test('${comment.authorName}', '${comment.email}')">${comment.authorName}</a> - ${new Date(comment.createdTime).toLocaleString()}</small>
+                        `;
+                    }
+                    commentsContainer.appendChild(commentElement);
+                });
+
+                setupPagination(data.totalPages, page);
+            })
+            .catch(error => {
+                console.error('API 호출 중 오류 발생:', error);
+            });
+    }
+
+    function setupPagination(totalPages, currentPage) {
+        const paginationContainer = document.getElementById('pagination-container');
+        paginationContainer.innerHTML = '';
+
+        if (totalPages > 1) {
+            for (let i = 0; i < totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i + 1;
+                button.disabled = i === currentPage;
+                button.addEventListener('click', () => {
+                    getComments(i);
+                });
+                paginationContainer.appendChild(button);
+            }
+        }
+    }
+
+    function showChatDialog(memberName, memberEmail, distance) {
+        // 대화하기 모달 창 요소 가져오기
+        const modal = document.getElementById("chatModal");
+        // 대화하기 모달 내용 요소 가져오기
+        const modalContent = document.querySelector(".modal-content");
+        // 선택한 회원 이름 표시 요소 가져오기
+        const selectedMemberName = document.getElementById("selectedMemberName");
+        // 선택한 회원과의 거리 표시 요소 가져오기
+        const distanceElement = document.getElementById("DistanceSelectedMember");
+
+        // 선택한 회원 이름 업데이트
+        selectedMemberName.textContent = memberName;
+        selectedMemberName.setAttribute('email', memberEmail);
+        // 선택한 회원간의 거리 표시
+        distanceElement.textContent = distance + "km";
+
+        // 대화하기 모달 창 표시
+        modal.style.display = "block";
+
+        // 닫기 버튼 클릭 시 모달 창 닫기
+        const closeButton = document.querySelector(".close");
+        closeButton.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // 모달 외부를 클릭하면 모달 창 닫기
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+
+    function createPrivateChatRoom() {
+        const selectedMemberName = document.getElementById('selectedMemberName');
+        console.log(selectedMemberName.textContent)
+        if (!selectedMemberName.textContent) return;
+        const data = {
+            "name"         : selectedMemberName.textContent,
+            "receiverEmail": selectedMemberName.getAttribute('email'),
+            "chatRoomType" : "PRIVATE"
+        };
+        fetch('http://localhost:8080/api/chat/createRoom', {
+            method : 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                'Content-Type' : "application/json"
+            },
+            body   : JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 409) {
+                        return response.json().then(data => {
+                            const split = data.message.split('value: ');
+                            const roomId = split[1];
+                            window.location.href = '/view/chatRoom?id=' + roomId;
+                        });
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.message);
+                        });
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                window.location.href = '/view/chatRoom?id=' + data.id;
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            })
+    }
+
+
+</script>
+</body>
+</html>

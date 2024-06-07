@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>글쓰기</title>
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+        }
+        .form-group button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="~{layout::header}"></div>
+<br>
+<div class="form-container">
+    <h2>글쓰기</h2>
+    <div class="form-group">
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" maxlength="40" placeholder="제목을 입력해주세요.(40자이내)" required>
+    </div>
+    <div class="form-group">
+        <label for="content">내용</label>
+        <textarea id="content" name="content" rows="10" maxlength="40" placeholder="내용을 입력해주세요.(500자이내)" required></textarea>
+    </div>
+    <div class="form-group">
+        <button id="submitBtn">등록</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('submitBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // 기본 폼 제출 방지
+
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
+
+        if (!title || !content) {
+            alert('제목과 내용을 입력해 주세요.');
+            return;
+        }
+
+        if (!sessionStorage.getItem('token')) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        fetch('http://localhost:8080/api/posts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            },
+            body: JSON.stringify({ title: title, content: content })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('글이 성공적으로 등록되었습니다.');
+                window.location.href = '/view/post?id='+ data.id; // 글 등록 후 홈 페이지로 이동
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+                alert('글 등록에 실패했습니다: ' + error.message);
+            });
+    });
+</script>
+</body>
+</html>
