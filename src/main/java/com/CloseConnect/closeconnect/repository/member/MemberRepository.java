@@ -31,7 +31,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         "ST_DISTANCE_SPHERE(" +
         "POINT(st_y(m1.location), st_x(m1.location)), " +
         "POINT(st_y(m2.location), st_x(m2.location))) / 1000, 1)" +
-        "FROM Member m1, Member m2 " +
+        "FROM member m1, member m2 " +
         "WHERE m1.email = :myEmail AND m2.email = :otherEmail", nativeQuery = true)
     Double findDistanceBetweenMembers(@Param("myEmail") String myEmail,
                                       @Param("otherEmail")String otherEmail);
