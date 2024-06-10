@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 글</title>
+    <style>
+        #writePostLink {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="~{layout::header}"></div>
+<a id="writePostLink" th:href="@{/view/writePost}">글쓰기</a> <!-- 글쓰기 링크 추가 -->
+<br>
+<div id="postList"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        getPostList();
+    });
+
+    function getPostList(title = '', content = '', author = '', page = 0, size = 10) {
+        const params = new URLSearchParams({
+            title: title,
+            content: content,
+            author: author,
+            page: page,
+            size: size
+        });
+
+        fetch(`http://localhost:8080/api/posts?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayPostList(data);
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            });
+    }
+
+    function displayPostList(data) {
+        const postListDiv = document.getElementById('postList');
+        postListDiv.innerHTML = ''; // 기존 내용 초기화
+
+        const ul = document.createElement('ul');
+
+        data.content.forEach(post => { // API 응답 데이터 구조에 따라 수정
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.textContent = post.title; // 게시글 제목을 링크 텍스트로 설정
+            a.setAttribute('href', '#'); // 게시글 상세 페이지 URL 설정
+            a.addEventListener('click', (event) => {
+                event.preventDefault(); // 기본 동작인 페이지 이동을 막음
+                window.location.href = '/view/post?id=' + post.id;
+            });
+            li.appendChild(a);
+            ul.appendChild(li);
+        });
+
+        postListDiv.appendChild(ul);
+    }
+</script>
+</body>
+</html>

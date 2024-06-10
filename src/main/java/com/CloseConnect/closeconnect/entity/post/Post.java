@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class Post extends BaseTime {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+    private boolean isDeleted;
+    private LocalDateTime deletedTime;
 
     @Builder
     public Post(Member author, String title, String content) {
@@ -36,4 +39,14 @@ public class Post extends BaseTime {
         this.title = title;
         this.content = content;
     }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedTime = LocalDateTime.now();
+    }
+
+    public void update(String content) {
+        this.content = content;
+    }
+
 }

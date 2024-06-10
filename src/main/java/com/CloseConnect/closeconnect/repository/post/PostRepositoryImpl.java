@@ -42,7 +42,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         post.updatedTime.stringValue()
                 ))
                 .from(post)
-                .where(whereBuilder)
+                .where(whereBuilder
+                        .and(post.isDeleted.eq(false)))
                 .orderBy(post.updatedTime.desc())
                 .limit(pageable.getPageSize())
                 .offset(pageable.getOffset())
@@ -51,6 +52,32 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         JPAQuery<Long> countQuery = jpaQueryFactory
                 .select(post.count())
                 .where(whereBuilder)
+                .from(post);
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<PostDto.ResponseList> findByEmail(String email, Pageable pageable) {
+        List<PostDto.ResponseList> content = jpaQueryFactory
+                .select(new QPostDto_ResponseList(
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.author.name.as("authorName"),
+                        post.updatedTime.stringValue()
+                ))
+                .from(post)
+                .where(post.author.email.eq(email)
+                        .and(post.isDeleted.eq(false)))
+                .orderBy(post.updatedTime.desc())
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch();
+
+        JPAQuery<Long> countQuery = jpaQueryFactory
+                .select(post.count())
+                .where(post.author.email.eq(email))
                 .from(post);
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);

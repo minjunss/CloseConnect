@@ -53,6 +53,7 @@ class ChatControllerTest {
         mockMvc.perform(post(BASE_POST_URI + "/createRoom")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer token")
                         .accept(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -67,6 +68,7 @@ class ChatControllerTest {
         doNothing().when(chatService).participantRoom(any(String.class), any(String.class));
 
         mockMvc.perform(post(BASE_POST_URI + "/participate/{roomId}", roomId)
+                        .header("Authorization", "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk());
     }
@@ -79,6 +81,7 @@ class ChatControllerTest {
         doNothing().when(chatService).outRoom(any(String.class), any(String.class));
 
         mockMvc.perform(post(BASE_POST_URI + "/outRoom/{roomId}", roomId)
+                        .header("Authorization", "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk());
     }
@@ -96,6 +99,7 @@ class ChatControllerTest {
 
         mockMvc.perform(get(BASE_POST_URI + "/myChatRooms")
                         .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(expectedResponse.get(0).getId()))
@@ -117,6 +121,7 @@ class ChatControllerTest {
 
         mockMvc.perform(get(BASE_POST_URI + "/chatRoomList")
                         .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(expectedResponse.get(0).getId()))
@@ -139,6 +144,7 @@ class ChatControllerTest {
 
         mockMvc.perform(get(BASE_POST_URI + "/chatMessageList/{chatRoomId}", chatRoomId)
                         .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(expectedResponse.get(0).getId()))

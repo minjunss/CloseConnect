@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,9 +33,36 @@ public class PostController {
             description = "글 등록 성공",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PostDto.Response.class))
     )
-    public ResponseEntity<?> createPost(@RequestBody PostDto.Request request,
-                                        @AuthenticationPrincipal UserDetails UserDetails) {
-        return ResponseEntity.ok(postService.save(request, UserDetails.getUsername()));
+    public ResponseEntity<?> createPost(@RequestHeader("Authorization") String token,
+                                        @Valid @RequestBody PostDto.Request request,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(postService.save(request, userDetails.getUsername()));
+    }
+    @PatchMapping("/update/{id}")
+    @Operation(summary = "글 수정 API", description = "글 내용 수정")
+    @ApiResponse(
+            responseCode = "200",
+            description = "글 내용 수정 성공"
+    )
+    public ResponseEntity<?> updatePost(@RequestHeader("Authorization") String token,
+                                        @PathVariable Long id,
+                                        @RequestBody PostDto.Request request,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        postService.update(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/delete/{id}")
+    @Operation(summary = "글 삭제 API", description = "글 삭제")
+    @ApiResponse(
+            responseCode = "200",
+            description = "글 삭제 성공"
+    )
+    public ResponseEntity<?> deletePost(@RequestHeader("Authorization") String token,
+                                        @PathVariable Long id,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        postService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
@@ -56,7 +84,10 @@ public class PostController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class)
             )
     )
-    public Page<?> readPostList(@RequestBody PostSearchCondition postSearchCondition, Pageable pageable) {
+    public Page<?> readPostList(@RequestParam(required = false) String title,
+                                @RequestParam(required = false) String content,
+                                @RequestParam(required = false) String author, Pageable pageable) {
+        PostSearchCondition postSearchCondition = new PostSearchCondition(title, content, author);
         return postService.getPostList(postSearchCondition, pageable);
     }
 }

@@ -7,10 +7,10 @@ import com.CloseConnect.closeconnect.entity.member.Member;
 import com.CloseConnect.closeconnect.entity.member.Role;
 import com.CloseConnect.closeconnect.global.exception.BusinessException;
 import com.CloseConnect.closeconnect.global.exception.ExceptionCode;
+import com.CloseConnect.closeconnect.repository.member.MemberRepository;
 import com.CloseConnect.closeconnect.security.oatuh2.OAuth2UserInfo;
 import com.CloseConnect.closeconnect.security.oatuh2.OAuth2UserInfoFactory;
 import com.CloseConnect.closeconnect.security.oatuh2.UserPrincipal;
-import com.CloseConnect.closeconnect.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +20,12 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final MemberRepository memberRepository;
@@ -98,14 +98,21 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         return memberRepository.findNearbyMemberList(locationDto.getLatitude(), locationDto.getLongitude(), locationDto.getRadius(), email, pageable);
     }
 
+    @Transactional(readOnly = true)
     public MemberResponseDto.ResponseDto getMyInfo(String email) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ExceptionCode.NOT_EXIST_MEMBER, email));
         return MemberResponseDto.ResponseDto.builder()
                 .name(member.getName())
                 .email(member.getEmail())
-                .latitude(member.getLatitude())
-                .longitude(member.getLongitude())
+                .latitude(member.getLocation() != null ? member.getLocation().getY() : null)
+                .longitude(member.getLocation() != null ? member.getLocation().getX() : null)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public double getDistanceBetweenMembers(String myEmail, String otherEmail) {
+        Double distanceBetweenMembers = memberRepository.findDistanceBetweenMembers(myEmail, otherEmail);
+        return distanceBetweenMembers == 0.0 ? 0.1 : distanceBetweenMembers;
     }
 }

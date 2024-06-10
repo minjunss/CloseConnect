@@ -1,16 +1,12 @@
 package com.CloseConnect.closeconnect.repository.chat;
 
-import com.CloseConnect.closeconnect.config.QueryDslConfig;
 import com.CloseConnect.closeconnect.entity.chat.ChatRoom;
 import com.CloseConnect.closeconnect.entity.chat.ChatRoomType;
 import com.CloseConnect.closeconnect.entity.chat.Participant;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.Optional;

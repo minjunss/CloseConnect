@@ -22,11 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,7 +48,7 @@ class PostControllerTest {
     @WithMockCustomUser
     void createPost() throws Exception {
         PostDto.Request request = new PostDto.Request("제목", "내용");
-        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", 1L, "이름",
+        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", "email", "이름",
                 "2024-03-29 12:00:00", "2024-03-29 12:00:00", null);
 
         when(postService.save(any(PostDto.Request.class), any(String.class))).thenReturn(expectedResponse);
@@ -59,6 +57,7 @@ class PostControllerTest {
         mockMvc.perform(post(BASE_POST_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(expectedResponse.id()))
@@ -68,14 +67,44 @@ class PostControllerTest {
 
     @Test
     @WithMockCustomUser
+    void updatePost() throws Exception {
+        Long postId = 1L;
+        PostDto.Request request = new PostDto.Request(null, "내용");
+
+        doNothing().when(postService).update(any(Long.class), any(PostDto.Request.class));
+
+        mockMvc.perform(patch(BASE_POST_URI + "/update/{id}", postId)
+                        .header("Authorization", "Bearer token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockCustomUser
+    void deletePost() throws Exception {
+        Long postId = 1L;
+
+        doNothing().when(postService).delete(any(Long.class));
+
+        mockMvc.perform(patch(BASE_POST_URI + "/delete/{id}", postId)
+                        .header("Authorization", "Bearer token")
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockCustomUser
     void readPost() throws Exception {
         Long postId = 1L;
-        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", 1L, "작성자",
+        PostDto.Response expectedResponse = new PostDto.Response(1L, "제목", "내용", "email", "작성자",
                 "2024-03-29 12:00:00", "2024-03-29 12:00:00", null);
 
-        when(postService.getPost(postId)).thenReturn(expectedResponse);
+        when(postService.getPost(any(Long.class))).thenReturn(expectedResponse);
 
-        mockMvc.perform(get(BASE_POST_URI + "/{id}", postId))
+        mockMvc.perform(get(BASE_POST_URI + "/{id}", postId)
+                        .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(expectedResponse.id()))
                 .andExpect(jsonPath("$.title").value(expectedResponse.title()))
@@ -99,6 +128,7 @@ class PostControllerTest {
 
         mockMvc.perform(get(BASE_POST_URI)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer token")
                         .content(objectMapper.writeValueAsString(postSearchCondition)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())

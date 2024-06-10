@@ -1,8 +1,16 @@
 package com.CloseConnect.closeconnect.controller.member;
 
 import com.CloseConnect.closeconnect.dto.member.LocationDto;
+import com.CloseConnect.closeconnect.dto.member.MemberRequestDto;
 import com.CloseConnect.closeconnect.dto.member.MemberResponseDto;
 import com.CloseConnect.closeconnect.service.member.MemberService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,29 +21,69 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/member")
+@Tag(name = "Member API", description = "회원 관련 API")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/myInfo")
-    public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal UserDetails userDetails) {
+    @Operation(summary = "내 정보 조회 API", description = "토큰으로 내 정보 조회")
+    @ApiResponse(
+            responseCode = "200",
+            description = "내 정보 조회 성공",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MemberResponseDto.ResponseDto.class)
+            )
+    )
+    public ResponseEntity<?> getMyInfo(@RequestHeader("Authorization") String token,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(memberService.getMyInfo(userDetails.getUsername()));
     }
 
     @PostMapping("/updateCoordinate")
-    public ResponseEntity<?> updateCoordinate(@AuthenticationPrincipal UserDetails userDetails,
+    @Operation(summary = "좌표 업데이트 API", description = "사용자 위치 좌표 업데이트")
+    @ApiResponse(
+            responseCode = "200",
+            description = "좌표 업데이트 성공"
+    )
+    public ResponseEntity<?> updateCoordinate(@RequestHeader("Authorization") String token,
+                                              @AuthenticationPrincipal UserDetails userDetails,
                                               @RequestBody LocationDto locationDto) {
         memberService.updateCoordinate(userDetails.getUsername(), locationDto);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/nearby")
-    public ResponseEntity<?> getNearbyMembers(@AuthenticationPrincipal UserDetails userDetails,
+    @Operation(summary = "내 근처 회원 조회 API", description = "사용자 근처 ?km 회원들 조회")
+    @ApiResponse(
+            responseCode = "200",
+            description = "근처 회원들 조회 성공",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class)
+            )
+    )
+    public ResponseEntity<?> getNearbyMembers(@RequestHeader("Authorization") String token,
+                                              @AuthenticationPrincipal UserDetails userDetails,
                                               LocationDto locationDto,
                                               Pageable pageable) {
         Page<MemberResponseDto.ResponseDto> nearbyMemberList = memberService.getNearbyMemberList(userDetails.getUsername(), locationDto, pageable);
 
         return ResponseEntity.ok(nearbyMemberList);
+    }
+
+    @PostMapping("/distanceBetweenMembers")
+    @Operation(summary = "사용자와 다른 회원간의 거리 조회 API", description = "사용자와 다른 회원간의 거리 조회")
+    @ApiResponse(
+            responseCode = "200",
+            description = "회원간의 거리 조회 성공",
+            content = @Content(mediaType = "application/json"
+            )
+    )
+    public ResponseEntity<?> getDistanceBetweenMembers(@RequestHeader("Authorization") String token,
+                                                       @AuthenticationPrincipal UserDetails userDetails,
+                                                       @RequestBody MemberRequestDto memberRequestDto) throws JsonProcessingException {
+        double distanceBetweenMembers = memberService.getDistanceBetweenMembers(userDetails.getUsername(), memberRequestDto.getEmail());
+
+        return ResponseEntity.ok(objectMapper.writeValueAsString(distanceBetweenMembers));
     }
 }

@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface PostRepositoryCustom {
     Page<PostDto.ResponseList> getList(PostSearchCondition postSearch, Pageable pageable);
+    Page<PostDto.ResponseList> findByEmail(String email, Pageable pageable);
 }
